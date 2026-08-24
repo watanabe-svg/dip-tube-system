@@ -1,0 +1,575 @@
+<!-- ===== ダッシュボード拡張コード (index.htmlに統合用) ===== -->
+<!-- このファイルのコードを index.html に統合してください -->
+
+<!-- ========== STEP 1: <style> セクションに以下を追加 ========== -->
+
+<style>
+  /* ✨ ダッシュボード専用スタイル */
+  .dashboard-tab {
+    display: none;
+  }
+  .dashboard-tab.active-view {
+    display: block !important;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    border: 2px solid #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+  }
+  .dashboard-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border-color: #2563eb;
+  }
+
+  .dashboard-card.alert {
+    border-color: #ef4444;
+    background: #fef2f2;
+  }
+  .dashboard-card.alert:hover {
+    box-shadow: 0 4px 16px rgba(239,68,68,0.15);
+  }
+
+  .dashboard-card.warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+  .dashboard-card.warning:hover {
+    box-shadow: 0 4px 16px rgba(245,158,11,0.15);
+  }
+
+  .dashboard-card h3 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dashboard-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+  }
+  .dashboard-metric:last-child {
+    border-bottom: none;
+  }
+
+  .metric-label {
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .metric-value {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #1e293b;
+  }
+
+  .metric-value.ok {
+    color: #10b981;
+  }
+  .metric-value.warning {
+    color: #f59e0b;
+  }
+  .metric-value.danger {
+    color: #ef4444;
+  }
+
+  .dashboard-progress-bar {
+    margin-top: 8px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    height: 24px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #fff;
+    position: relative;
+  }
+  .dashboard-progress-fill {
+    height: 100%;
+    background: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s ease;
+  }
+  .dashboard-progress-fill.ok {
+    background: #10b981;
+  }
+  .dashboard-progress-fill.warning {
+    background: #f59e0b;
+  }
+  .dashboard-progress-fill.danger {
+    background: #ef4444;
+  }
+
+  .alert-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+  }
+  .alert-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #fee2e2;
+    color: #991b1b;
+  }
+  .alert-list li:last-child {
+    border-bottom: none;
+  }
+  .alert-list strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .task-chip {
+    display: inline-block;
+    background: #eff6ff;
+    border-left: 3px solid #2563eb;
+    padding: 6px 8px;
+    margin: 4px 4px 4px 0;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    color: #0369a1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .task-chip.warning {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+  }
+
+  .task-chip.danger {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .status-badge.running {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  .status-badge.stopped {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  .status-badge.planned {
+    background: #dbeafe;
+    color: #0c4a6e;
+  }
+
+  .equipment-status {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .equipment-item {
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border-left: 3px solid #cbd5e1;
+    font-size: 0.8rem;
+  }
+  .equipment-item.running {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+  }
+  .equipment-item.stopped {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+  }
+  .equipment-item.planned {
+    border-left-color: #2563eb;
+    background: #eff6ff;
+  }
+  .equipment-item strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #1e293b;
+  }
+
+  .kpi-box {
+    text-align: center;
+    padding: 12px;
+    background: #f0f9ff;
+    border-radius: 6px;
+    margin: 8px 0;
+    border: 1px solid #bae6fd;
+  }
+  .kpi-box .value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2563eb;
+    margin: 4px 0;
+  }
+  .kpi-box .label {
+    font-size: 0.75rem;
+    color: #0369a1;
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .quick-action-btn {
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+  }
+  .quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  .quick-action-btn.primary {
+    background: #2563eb;
+  }
+  .quick-action-btn.primary:hover {
+    background: #1d4ed8;
+  }
+  .quick-action-btn.secondary {
+    background: #0284c7;
+  }
+  .quick-action-btn.secondary:hover {
+    background: #0369a1;
+  }
+  .quick-action-btn.success {
+    background: #10b981;
+  }
+  .quick-action-btn.success:hover {
+    background: #059669;
+  }
+  .quick-action-btn.muted {
+    background: #64748b;
+  }
+  .quick-action-btn.muted:hover {
+    background: #475569;
+  }
+</style>
+
+<!-- ========== STEP 2: <body> 内に以下のHTMLを追加 ========== -->
+<!-- 場所: <div class="container"> > <div class="grid-main"> の直前 -->
+
+<div id="dashboardView" class="dashboard-tab">
+  <!-- アラートセクション -->
+  <div class="dashboard-grid">
+    <!-- 緊急アラート -->
+    <div class="dashboard-card alert">
+      <h3>🚨 緊急アラート</h3>
+      <ul class="alert-list" id="emergencyAlerts">
+        <li><strong>納期遅延の可能性</strong>ORD-001 (2日遅延予測)</li>
+        <li><strong>キャパシティ超過</strong>明日の負荷: 120%</li>
+      </ul>
+    </div>
+
+    <!-- 確認待ち -->
+    <div class="dashboard-card warning">
+      <h3>⏳ 確認待ち</h3>
+      <ul class="alert-list" id="pendingApprovals">
+        <li><strong>配方実績申請</strong>3件待機中</li>
+        <li><strong>生産計画確認</strong>2件確認待ち</li>
+      </ul>
+    </div>
+
+    <!-- 本日の進捗 -->
+    <div class="dashboard-card">
+      <h3>📊 本日の進捗</h3>
+      <div class="dashboard-metric">
+        <span class="metric-label">計画タスク</span>
+        <span class="metric-value" id="todayPlanned">12</span>
+      </div>
+      <div class="dashboard-metric">
+        <span class="metric-label">完了</span>
+        <span class="metric-value ok" id="todayCompleted">8</span>
+      </div>
+      <div class="kpi-box">
+        <div class="label">進捗率</div>
+        <div class="value" id="todayProgressRate">67%</div>
+        <div class="dashboard-progress-bar">
+          <div class="dashboard-progress-fill ok" id="todayProgressBar" style="width: 67%;">67%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 実績入力 -->
+    <div class="dashboard-card">
+      <h3>📝 本日実績入力状況</h3>
+      <div class="dashboard-metric">
+        <span class="metric-label">入力済み</span>
+        <span class="metric-value ok" id="inputComplete">5 / 8</span>
+      </div>
+      <div class="dashboard-metric">
+        <span class="metric-label">未入力</span>
+        <span class="metric-value warning" id="inputPending">3</span>
+      </div>
+      <button class="quick-action-btn primary" style="margin-top: 8px; width: 100%;" 
+              onclick="switchToDetailView('mfg')">
+        実績入力へ →
+      </button>
+    </div>
+  </div>
+
+  <!-- タスク・設備セクション -->
+  <div class="dashboard-grid">
+    <!-- 本日のタスク -->
+    <div class="dashboard-card">
+      <h3>📋 本日のタスク</h3>
+      <div id="todayTasks">
+        <div class="task-chip">DIP-001 (09:00-12:00)</div>
+        <div class="task-chip">TUBE-002 (13:00-17:00)</div>
+        <div class="task-chip">DIP-003 (明朝継続)</div>
+      </div>
+    </div>
+
+    <!-- 明日の予定 -->
+    <div class="dashboard-card">
+      <h3>📅 明日の予定</h3>
+      <div id="tomorrowTasks">
+        <div class="task-chip warning">DIP-004 (キャパ注意)</div>
+        <div class="task-chip">TUBE-005</div>
+      </div>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
+        <div class="dashboard-metric">
+          <span class="metric-label">予定負荷</span>
+          <span class="metric-value warning">110%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設備状態 -->
+    <div class="dashboard-card">
+      <h3>🔧 設備稼働状況</h3>
+      <div class="equipment-status">
+        <div class="equipment-item running">
+          <strong>DIP-A</strong>
+          <span class="status-badge running">稼働中</span>
+        </div>
+        <div class="equipment-item running">
+          <strong>DIP-B</strong>
+          <span class="status-badge running">稼働中</span>
+        </div>
+        <div class="equipment-item stopped">
+          <strong>TUBE-C</strong>
+          <span class="status-badge stopped">停止</span>
+        </div>
+        <div class="equipment-item planned">
+          <strong>TUBE-D</strong>
+          <span class="status-badge planned">予定中</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- オペレータ配置 -->
+    <div class="dashboard-card">
+      <h3>👥 本日のオペレータ配置</h3>
+      <div id="operatorAllocation">
+        <div class="dashboard-metric">
+          <span class="metric-label">配置済み</span>
+          <span class="metric-value ok">6 / 6</span>
+        </div>
+        <div class="dashboard-metric">
+          <span class="metric-label">残業対応</span>
+          <span class="metric-value warning">2名</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- クイックアクション -->
+  <div class="card" style="background: #f0f9ff; border-top: 3px solid #2563eb;">
+    <h2>🚀 クイックアクション</h2>
+    <div class="quick-actions">
+      <button class="quick-action-btn primary" onclick="switchToDetailView('mfg')">
+        📊 実績入力
+      </button>
+      <button class="quick-action-btn secondary" onclick="scrollToFormula()">
+        ✅ 配方承認
+      </button>
+      <button class="quick-action-btn success" onclick="switchToDetailView('mfg')">
+        📋 生産計画確認
+      </button>
+      <button class="quick-action-btn muted" onclick="switchToDashboard()">
+        📈 詳細ビューへ
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== STEP 3: JavaScriptを <script> セクションに追加 ========== -->
+
+<script>
+// ========== ダッシュボード関連の関数 ==========
+
+/**
+ * ダッシュボードビューに切り替える
+ */
+function switchToDashboard() {
+  // 既存タブを非表示
+  document.querySelectorAll('[id^="view"]').forEach(el => {
+    el.classList.remove('active-view');
+  });
+  
+  // ダッシュボード表示
+  const dashboardView = document.getElementById('dashboardView');
+  if (dashboardView) {
+    dashboardView.classList.add('active-view');
+  }
+  
+  // タブボタン更新
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const dashboardTab = document.querySelector('[data-tab="dashboard"]');
+  if (dashboardTab) {
+    dashboardTab.classList.add('active');
+  }
+  
+  // データ更新
+  updateDashboard();
+}
+
+/**
+ * 詳細ビューに切り替える
+ */
+function switchToDetailView(mode = 'mfg') {
+  const dashboardView = document.getElementById('dashboardView');
+  if (dashboardView) {
+    dashboardView.classList.remove('active-view');
+  }
+  
+  // 既存の詳細ビューを表示
+  const viewId = mode === 'sales' ? 'viewSalesOrders' : 'viewCalendar';
+  const detailView = document.getElementById(viewId);
+  if (detailView) {
+    detailView.classList.add('active-view');
+  }
+  
+  // タブボタン更新
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+}
+
+/**
+ * ダッシュボードデータ更新（定期的に呼び出し）
+ */
+function updateDashboard() {
+  // 本日の進捗を更新
+  const progress = Math.floor(Math.random() * 40 + 50); // 50-90%
+  const completed = Math.floor(12 * progress / 100);
+  
+  document.getElementById('todayProgressRate').textContent = progress + '%';
+  document.getElementById('todayCompleted').textContent = completed;
+  
+  const progressBar = document.getElementById('todayProgressBar');
+  if (progressBar) {
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = progress + '%';
+    
+    // 進捗率に応じて色変更
+    progressBar.classList.remove('ok', 'warning', 'danger');
+    if (progress >= 80) {
+      progressBar.classList.add('ok');
+    } else if (progress >= 60) {
+      progressBar.classList.add('warning');
+    } else {
+      progressBar.classList.add('danger');
+    }
+  }
+  
+  // 実績入力状況を更新
+  const inputComplete = Math.floor(Math.random() * 3 + 5);
+  document.getElementById('inputComplete').textContent = inputComplete + ' / 8';
+  document.getElementById('inputPending').textContent = 8 - inputComplete;
+}
+
+/**
+ * 配方承認セクションにスクロール
+ */
+function scrollToFormula() {
+  const formulaSection = document.getElementById('formulaSection');
+  if (formulaSection) {
+    formulaSection.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    alert('配方セクションが見つかりません');
+  }
+}
+
+/**
+ * ダッシュボード初期化
+ */
+function initDashboard() {
+  // 初回更新
+  updateDashboard();
+  
+  // 30秒ごとにデータ更新
+  setInterval(updateDashboard, 30000);
+  
+  // ダッシュボードタブボタンをHTMLに追加
+  // 注: 既存の tab-btn-group に以下を挿入してください
+  // <div class="tab-btn" data-tab="dashboard" onclick="switchToDashboard()">
+  //   <span class="tab-drag-handle">☰</span>
+  //   <span>📊 ダッシュボード</span>
+  // </div>
+}
+
+// ページ読み込み時にダッシュボードを初期化
+document.addEventListener('DOMContentLoaded', function() {
+  initDashboard();
+});
+</script>
+
+<!-- ========== 統合手順 ========== -->
+<!--
+1. 上記のSTEP 1の<style>内容をindex.htmlの<style>セクションに追加
+2. STEP 2のHTMLを、index.htmlの <div class="container"> 内で、
+   <div class="grid-main"> タグより前に挿入
+3. STEP 3のJavaScriptをindex.htmlの<script>セクションに追加
+4. 既存のタブボタングループ（.tab-btn-group）に以下を追加:
+   
+   <div class="tab-btn" data-tab="dashboard" onclick="switchToDashboard()">
+     <span class="tab-drag-handle">☰</span>
+     <span>📊 ダッシュボード</span>
+   </div>
+   
+5. index.htmlをブラウザで開き、「📊 ダッシュボード」タブをクリックして動作確認
+
+注意:
+- 既存のビュー切り替え関数がある場合は、switchToDetailView()と組み合わせてください
+- アラート内容やタスク、設備情報は、実際のデータソース(Google Sheets等)と連携してください
+- オペレータの配置や実績入力状況も、実データから自動更新するように改良してください
+-->
