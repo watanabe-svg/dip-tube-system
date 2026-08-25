@@ -12855,7 +12855,8 @@ function saveData(triggerSync = true) {
         category: currentCategory,
         payload: {
           orders: orders,
-          dailyActuals: dailyActuals
+          dailyActuals: dailyActuals,
+          masterData: masterData
         }
       })
     })
@@ -13526,6 +13527,11 @@ function renderMaterialOrderingTab() {
             }
             if (resData.data.dailyActuals) {
               dailyActuals = resData.data.dailyActuals;
+            }
+            if (resData.data.masterData && resData.data.masterData.length > 0) {
+              masterData = resData.data.masterData;
+              if (typeof renderMasterTable === 'function') renderMasterTable();
+              if (typeof updateMasterDatalist === 'function') updateMasterDatalist();
             }
             renderCalendar();
             calculate();
