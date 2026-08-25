@@ -13533,6 +13533,22 @@ function renderMaterialOrderingTab() {
               if (typeof renderMasterTable === 'function') renderMasterTable();
               if (typeof updateMasterDatalist === 'function') updateMasterDatalist();
             }
+            if (resData.data.materialMasterV2) {
+              materialMasterV2 = resData.data.materialMasterV2;
+              materialSeq = materialMasterV2.reduce((max, m) => Math.max(max, parseInt(m.id) || 0), 0) + 1;
+            }
+            if (resData.data.bomList) {
+              bomList = resData.data.bomList;
+            }
+            if (resData.data.purchaseOrders) {
+              purchaseOrders = resData.data.purchaseOrders;
+              purchaseOrderSeq = purchaseOrders.reduce((max, p) => Math.max(max, parseInt(p.orderId) || 0), 0) + 1;
+            }
+            if (resData.data.consumptionActuals) {
+              consumptionActuals = resData.data.consumptionActuals;
+            }
+            saveSharedMaterialData();
+            if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
             renderCalendar();
             calculate();
           }
