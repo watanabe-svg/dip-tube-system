@@ -2435,8 +2435,17 @@
 
         <hr style="border:none; border-top:2px solid #cbd5e1; margin:25px 0;">
 
-        <h2 style="font-size:1.1rem;">🧾 材料発注管理</h2>
-        <p style="font-size:0.75rem; color:#64748b;">材料マスター・BOM・発注管理・消費実績はDIP/Tubeで共有され、Googleスプレッドシートと同期されます。</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2 style="font-size:1.1rem; margin-bottom:2px;">🧾 材料発注管理</h2>
+            <p style="font-size:0.75rem; color:#64748b; margin:0;">材料マスター・BOM・発注管理・消費実績はDIP/Tubeで共有され、Googleスプレッドシートと同期されます。</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="materialSyncMsg" style="font-size:0.8rem; font-weight:bold; color:#0d9488;"></span>
+            <button type="button" onclick="syncMaterialsToSheet()" style="width:auto; padding:5px 12px; font-size:0.8rem; background:#0d9488;">☁️ 今すぐシートへ保存</button>
+            <button type="button" onclick="loadMaterialsFromSheet()" style="width:auto; padding:5px 12px; font-size:0.8rem; background:#64748b;">🔄 シートから再読込</button>
+          </div>
+        </div>
 
         <h3 style="font-size:0.95rem; color:#2563eb; border-bottom:1px solid #cbd5e1; padding-bottom:4px; margin-top:20px;">① 材料マスター</h3>
         <div style="background:#f0fdf4; padding:10px; border-radius:6px; border:1px solid #86efac; margin-bottom:10px;">
@@ -12856,7 +12865,11 @@ function saveData(triggerSync = true) {
         payload: {
           orders: orders,
           dailyActuals: dailyActuals,
-          masterData: masterData
+          masterData: masterData,
+          materialMasterV2: materialMasterV2,
+          bomList: bomList,
+          purchaseOrders: purchaseOrders,
+          consumptionActuals: consumptionActuals
         }
       })
     })
