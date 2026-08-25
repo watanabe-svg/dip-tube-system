@@ -11496,33 +11496,78 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     calculate();
   }
 
-  // 現在システム内に存在する全ての材料名を集約する（マスター／オーダー／材料在庫台帳／計算結果 由来）
+  // 現在システム内に存在する全ての材料名を集約する（マスター／オーダー／材料マスターV2／材料在庫台帳／計算結果 由来）
   function getAllMaterialNames() {
     const materialSet = new Set();
 
-    masterData.forEach(m => {
-      const mats = m.materials || (m.material ? [m.material] : []);
-      mats.forEach(mat => {
-        const clean = (mat || '').trim();
+    if (Array.isArray(materialMasterV2)) {
+      materialMasterV2.forEach(m => {
+        if (!m || !m.name) return;
+        const clean = String(m.name).trim();
         if (clean) materialSet.add(clean);
       });
-    });
+    }
 
-    orders.forEach(o => {
-      const clean = (o.material || '').trim();
-      if (clean) materialSet.add(clean);
-    });
+    if (Array.isArray(masterData)) {
+      masterData.forEach(m => {
+        const mats = m.materials || (m.material ? [m.material] : []);
+        mats.forEach(mat => {
+          const clean = String(mat || '').trim();
+          if (clean) materialSet.add(clean);
+        });
+      });
+    }
 
-    latestComputedResults.forEach(res => {
-      const clean = (res.material || '').trim();
-      if (clean) materialSet.add(clean);
-    });
+    if (Array.isArray(orders)) {
+      orders.forEach(o => {
+        const clean = String(o.material || '').trim();
+        if (clean) materialSet.add(clean);
+      });
+    }
 
-    Object.keys(materialStockData).forEach(k => {
-      if (k) materialSet.add(k);
-    });
+    if (Array.isArray(latestComputedResults)) {
+      latestComputedResults.forEach(res => {
+        const clean = String(res.material || '').trim();
+        if (clean) materialSet.add(clean);
+      });
+    }
+
+    if (materialStockData && typeof materialStockData === 'object') {
+      Object.keys(materialStockData).forEach(k => {
+        if (k && String(k).trim()) materialSet.add(String(k).trim());
+      });
+    }
 
     return Array.from(materialSet).sort();
+  }
+
+  // 🧪 材料マスターV2のデータを材料在庫テーブル(materialStockData)へ整合・同期
+  function syncMaterialStockDataFromMasterV2() {
+    if (!Array.isArray(materialMasterV2)) return;
+    materialMasterV2.forEach(m => {
+      if (!m || !m.name) return;
+      const matName = String(m.name).trim();
+      if (!matName) return;
+      if (!materialStockData[matName]) {
+        materialStockData[matName] = {
+          currentStockKg: parseFloat(m.currentStock) || 0,
+          nextArrivalDate: '',
+          nextArrivalKg: 0,
+          leadTimeDays: parseInt(m.leadTime) || 0,
+          safetyStockKg: parseFloat(m.safetyStock) || 0
+        };
+      } else {
+        if (m.currentStock !== undefined && m.currentStock !== null && m.currentStock !== '') {
+          materialStockData[matName].currentStockKg = parseFloat(m.currentStock) || 0;
+        }
+        if (m.safetyStock !== undefined && m.safetyStock !== null && m.safetyStock !== '') {
+          materialStockData[matName].safetyStockKg = parseFloat(m.safetyStock) || 0;
+        }
+        if (m.leadTime !== undefined && m.leadTime !== null && m.leadTime !== '') {
+          materialStockData[matName].leadTimeDays = parseInt(m.leadTime) || 0;
+        }
+      }
+    });
   }
 
   // 🧪 材料MRP（日割り時系列バケット方式）: 指定材料の在庫推移を1日ずつシミュレーションし、
@@ -11599,44 +11644,51 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    syncMaterialStockDataFromMasterV2();
+
     const materialMap = {};
 
-    masterData.forEach(m => {
-      const mats = m.materials || (m.material ? [m.material] : []);
-      mats.forEach(mat => {
-        const clean = mat.trim();
-        if (clean && !materialMap[clean]) {
-          materialMap[clean] = { requiredKg: 0 };
-        }
-      });
-    });
-
-    orders.forEach(o => {
-      const clean = (o.material || '').trim();
-      if (clean && !materialMap[clean]) {
-        materialMap[clean] = { requiredKg: 0 };
-      }
-    });
-
-    latestComputedResults.forEach(res => {
-      const matName = (res.material || '').trim();
-      if (!matName) return;
-
-      const masterItem = masterData.find(m => m.name === res.name);
-      const usageG = masterItem ? (masterItem.materialUsageG || 0) : 0;
-      
-      const baseMatKg = (res.requiredProductionPcs * usageG * 1.1) / 1000;
-      const prepKg = res.prepMaterialKg || 0;
-      const totalReqKg = baseMatKg + prepKg;
-
-      if (!materialMap[matName]) {
-        materialMap[matName] = { requiredKg: 0 };
-      }
-      materialMap[matName].requiredKg += totalReqKg;
-    });
-
+    // 1. 全登録材料を初期化
     getAllMaterialNames().forEach(matName => {
       if (!materialMap[matName]) materialMap[matName] = { requiredKg: 0 };
+    });
+
+    // 2. オーダー／計画から材料必要量を集計（BOM・製品マスター・Tube仕様に対応）
+    const planItems = (latestComputedResults && latestComputedResults.length > 0) ? latestComputedResults : orders;
+    planItems.forEach(res => {
+      const pcs = res.requiredProductionPcs !== undefined ? res.requiredProductionPcs : (res.orderQty || 0);
+      if (pcs <= 0) return;
+
+      const masterItem = Array.isArray(masterData) ? masterData.find(m => m.name === res.name) : null;
+      const defaultMat = (res.material || (masterItem ? (masterItem.material || (masterItem.materials && masterItem.materials[0])) : '') || '').trim();
+
+      // BOMからの照合
+      const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => b.productName === res.name);
+      if (matchedBoms.length > 0) {
+        matchedBoms.forEach(b => {
+          const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId) || String(m.name).trim() === String(b.materialId).trim());
+          const targetMatName = mat ? String(mat.name).trim() : (b.materialId || defaultMat);
+          if (!targetMatName) return;
+          let bQty = parseFloat(b.qty) || 0;
+          let bUnit = (b.unit || 'g').toLowerCase();
+          let kgPerPcs = (bUnit === 'kg') ? bQty : (bQty / 1000);
+          const totalReqKg = pcs * kgPerPcs * 1.1 + (res.prepMaterialKg || 0);
+          if (!materialMap[targetMatName]) materialMap[targetMatName] = { requiredKg: 0 };
+          materialMap[targetMatName].requiredKg += totalReqKg;
+        });
+      } else if (defaultMat) {
+        // 製品マスターからの所要量
+        let usageG = masterItem ? (masterItem.materialUsageG || masterItem.weight || 0) : 0;
+        if (usageG === 0 && masterItem && masterItem.rollWeight) {
+          usageG = (parseFloat(masterItem.rollWeight) || 0) * 1000;
+        }
+        const baseMatKg = (pcs * usageG * 1.1) / 1000;
+        const prepKg = res.prepMaterialKg || 0;
+        const totalReqKg = baseMatKg + prepKg;
+
+        if (!materialMap[defaultMat]) materialMap[defaultMat] = { requiredKg: 0 };
+        materialMap[defaultMat].requiredKg += totalReqKg;
+      }
     });
 
     const matKeys = Object.keys(materialMap).sort();
@@ -11665,8 +11717,10 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
 
       const t = translations[currentLang] || translations.ja;
       let statusHtml = '';
-      if (currentStockKg >= reqKg) {
+      if (currentStockKg >= reqKg && remainingKg >= safetyStockKg) {
         statusHtml = `<span style="color:#10b981; font-weight:bold;">${t.ms_status_safe || '✔ 在庫十分 (安全)'}</span>`;
+      } else if (currentStockKg >= reqKg) {
+        statusHtml = `<span style="color:#2563eb; font-weight:bold;">✔ 計画充当可 (安全在庫割れ)</span>`;
       } else if (totalAvailableKg >= reqKg) {
         statusHtml = `<span style="color:#d97706; font-weight:bold;">${t.ms_status_pending || '⚠️ 次回入荷で充当可'}</span>`;
       } else {
@@ -11729,6 +11783,48 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     });
   }
 
+  // 🧪 材料在庫テーブルのインライン編集ハンドラ（材料マスターV2とも双方向同期）
+  function updateMaterialStock(matName, field, value) {
+    pushUndoState();
+    if (!materialStockData[matName]) {
+      materialStockData[matName] = { currentStockKg: 0, nextArrivalDate: '', nextArrivalKg: 0, leadTimeDays: 0, safetyStockKg: 0 };
+    }
+    if (field === 'leadTimeDays') {
+      materialStockData[matName].leadTimeDays = Math.max(0, parseInt(value) || 0);
+    } else if (field === 'nextArrivalDate') {
+      materialStockData[matName].nextArrivalDate = normalizeDateStr(value || '');
+    } else {
+      materialStockData[matName][field] = Math.max(0, parseFloat(value) || 0);
+    }
+
+    // 材料マスターV2への反映
+    let mm = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
+    if (!mm) {
+      mm = {
+        id: materialSeq++,
+        name: matName,
+        currentStock: materialStockData[matName].currentStockKg || 0,
+        unit: 'kg',
+        safetyStock: materialStockData[matName].safetyStockKg || 0,
+        monthlyConsumption: 0,
+        leadTime: materialStockData[matName].leadTimeDays || 0,
+        supplier: '',
+        unitPrice: 0
+      };
+      materialMasterV2.push(mm);
+    } else {
+      if (field === 'currentStockKg') mm.currentStock = materialStockData[matName].currentStockKg;
+      if (field === 'safetyStockKg') mm.safetyStock = materialStockData[matName].safetyStockKg;
+      if (field === 'leadTimeDays') mm.leadTime = materialStockData[matName].leadTimeDays;
+    }
+
+    saveData();
+    saveSharedMaterialData();
+    calculate();
+    if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
+    scheduleMaterialSync();
+  }
+
   // 材料の発注提案（日割り時系列MRPによる枯渇予測日 - リードタイム = 発注推奨日）を全材料分算出する
   function computeMaterialOrderPlan(results) {
     const plan = [];
@@ -11756,9 +11852,27 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     materialStockData[matName].nextArrivalDate = mrp.depletionDate;
     materialStockData[matName].nextArrivalKg = mrp.suggestedQtyKg;
 
+    // 発注管理(purchaseOrders)にも自動で起票
+    const mat = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
+    const newPO = {
+      orderId: purchaseOrderSeq++,
+      orderDate: formatDateLocal(new Date()),
+      materialId: mat ? mat.id : matName,
+      orderQty: mrp.suggestedQtyKg,
+      unit: mat ? mat.unit : 'kg',
+      supplier: mat ? mat.supplier : '',
+      leadTime: mrp.leadTimeDays,
+      dueDate: mrp.depletionDate,
+      status: '発注済',
+      amount: (mat && mat.unitPrice ? mat.unitPrice * mrp.suggestedQtyKg : 0)
+    };
+    purchaseOrders.push(newPO);
+
     saveData();
     saveSharedMaterialData();
     calculate();
+    if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
+    scheduleMaterialSync();
     alert(tr('msg_ms_order_applied', { name: matName, date: mrp.depletionDate, qty: mrp.suggestedQtyKg }));
     setTimeout(() => scrollToMaterialRow(matName), 100);
   }
@@ -12925,6 +13039,9 @@ function scheduleMaterialSync() {
 
 function loadMaterialsFromSheet() {
   if (typeof BACKYARD_GAS_URL === 'undefined') return;
+  const indicator = document.getElementById('materialSyncMsg');
+  if (indicator) indicator.textContent = '🔄 シートから読込中...';
+
   fetch(`${BACKYARD_GAS_URL}?type=materials`)
     .then(res => res.json())
     .then(resData => {
@@ -12944,10 +13061,17 @@ function loadMaterialsFromSheet() {
           consumptionActuals = resData.data.consumptionActuals;
         }
         saveSharedMaterialData();
+        syncMaterialStockDataFromMasterV2();
         if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
+        if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
+        if (typeof calculate === 'function') calculate();
+        if (indicator) indicator.textContent = '✔ 材料データ読込完了';
       }
     })
-    .catch(err => console.error('材料データ読込エラー:', err));
+    .catch(err => {
+      console.error('材料データ読込エラー:', err);
+      if (indicator) indicator.textContent = '⚠️ 読込エラー';
+    });
 }
 window.addEventListener('load', () => setTimeout(loadMaterialsFromSheet, 500));
 
@@ -12970,9 +13094,11 @@ function addMaterialMasterV2() {
   ['mm2Name','mm2CurrentStock','mm2SafetyStock','mm2MonthlyConsumption','mm2LeadTime','mm2Supplier','mm2UnitPrice'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  syncMaterialStockDataFromMasterV2();
   renderMaterialMasterV2Table();
   renderReorderSuggestions();
   renderBomMaterialOptions();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
@@ -12986,7 +13112,9 @@ function updateMaterialMasterV2Field(id, field, value) {
   } else {
     item[field] = value;
   }
+  syncMaterialStockDataFromMasterV2();
   renderReorderSuggestions();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
@@ -12998,6 +13126,7 @@ function removeMaterialMasterV2(id) {
   renderBomTable();
   renderReorderSuggestions();
   renderBomMaterialOptions();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
@@ -13005,7 +13134,7 @@ function renderMaterialMasterV2Table() {
   const tbody = document.getElementById('mm2TableBody');
   if (!tbody) return;
   if (materialMasterV2.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#94a3b8; padding:15px;">材料が登録されていません</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding:15px;">材料が登録されていません</td></tr>';
     return;
   }
   tbody.innerHTML = materialMasterV2.map(m => `
@@ -13044,12 +13173,16 @@ function addBomEntry() {
   document.getElementById('bomQty').value = '';
   document.getElementById('bomNote').value = '';
   renderBomTable();
+  renderReorderSuggestions();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
 function removeBomEntry(idx) {
   bomList.splice(idx, 1);
   renderBomTable();
+  renderReorderSuggestions();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
@@ -13061,11 +13194,11 @@ function renderBomTable() {
     return;
   }
   tbody.innerHTML = bomList.map((b, idx) => {
-    const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId));
+    const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId) || String(m.name).trim() === String(b.materialId).trim());
     return `
     <tr>
       <td>${b.productName}</td>
-      <td>${mat ? mat.name : '(不明な材料 ID:' + b.materialId + ')'}</td>
+      <td>${mat ? mat.name : '(ID:' + b.materialId + ')'}</td>
       <td>${b.qty}</td>
       <td>${b.unit}</td>
       <td>${b.note || ''}</td>
@@ -13105,7 +13238,9 @@ function computeReorderSuggestions() {
         let unitDemandInMatUnit = 0;
 
         // BOMからの照合
-        const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => b.productName === o.name && String(b.materialId) === String(m.id));
+        const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => 
+          b.productName === o.name && (String(b.materialId) === String(m.id) || String(b.materialId).trim() === String(m.name).trim())
+        );
         if (matchedBoms.length > 0) {
           matchedBoms.forEach(b => {
             let bQty = parseFloat(b.qty) || 0;
@@ -13125,7 +13260,10 @@ function computeReorderSuggestions() {
           const mats = masterItem ? (masterItem.materials || (masterItem.material ? [masterItem.material] : [])) : [];
           const isMatched = mats.some(mat => String(mat).trim() === String(m.name).trim()) || (o.material && String(o.material).trim() === String(m.name).trim());
           if (isMatched && masterItem) {
-            const usageG = masterItem.materialUsageG || 0;
+            let usageG = masterItem.materialUsageG || masterItem.weight || 0;
+            if (usageG === 0 && masterItem.rollWeight) {
+              usageG = (parseFloat(masterItem.rollWeight) || 0) * 1000;
+            }
             const mUnit = (m.unit || 'kg').toLowerCase();
             if (mUnit === 'kg') {
               unitDemandInMatUnit += (usageG * 1.1) / 1000;
@@ -13153,7 +13291,8 @@ function computeReorderSuggestions() {
     let pendingPoQty = 0;
     if (Array.isArray(purchaseOrders)) {
       purchaseOrders.forEach(po => {
-        if (String(po.materialId) === String(m.id) && po.status !== '入庫完了') {
+        const isPoMat = String(po.materialId) === String(m.id) || String(po.materialId).trim() === String(m.name).trim();
+        if (isPoMat && po.status !== '入庫完了') {
           pendingPoQty += parseFloat(po.orderQty) || 0;
         }
       });
