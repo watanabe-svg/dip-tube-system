@@ -12916,20 +12916,27 @@ function loadMaterialsFromSheet() {
     .then(res => res.json())
     .then(resData => {
       if (resData.status === 'success' && resData.data) {
-        if (resData.data.materialMasterV2) materialMasterV2 = resData.data.materialMasterV2;
-        if (resData.data.bomList) bomList = resData.data.bomList;
-        if (resData.data.purchaseOrders) purchaseOrders = resData.data.purchaseOrders;
-        if (resData.data.consumptionActuals) consumptionActuals = resData.data.consumptionActuals;
-        materialSeq = materialMasterV2.reduce((max, m) => Math.max(max, parseInt(m.id) || 0), 0) + 1;
-        purchaseOrderSeq = purchaseOrders.reduce((max, p) => Math.max(max, parseInt(p.orderId) || 0), 0) + 1;
-        if (typeof renderMaterialMasterV2Table === 'function') renderMaterialMasterV2Table();
-        if (typeof renderReorderSuggestions === 'function') renderReorderSuggestions();
-        if (typeof renderPurchaseOrdersTable === 'function') renderPurchaseOrdersTable();
+        if (Array.isArray(resData.data.materialMasterV2) && resData.data.materialMasterV2.length > 0) {
+          materialMasterV2 = resData.data.materialMasterV2;
+          materialSeq = materialMasterV2.reduce((max, m) => Math.max(max, parseInt(m.id) || 0), 0) + 1;
+        }
+        if (Array.isArray(resData.data.bomList) && resData.data.bomList.length > 0) {
+          bomList = resData.data.bomList;
+        }
+        if (Array.isArray(resData.data.purchaseOrders) && resData.data.purchaseOrders.length > 0) {
+          purchaseOrders = resData.data.purchaseOrders;
+          purchaseOrderSeq = purchaseOrders.reduce((max, p) => Math.max(max, parseInt(p.orderId) || 0), 0) + 1;
+        }
+        if (Array.isArray(resData.data.consumptionActuals) && resData.data.consumptionActuals.length > 0) {
+          consumptionActuals = resData.data.consumptionActuals;
+        }
+        saveSharedMaterialData();
+        if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
       }
     })
     .catch(err => console.error('材料データ読込エラー:', err));
 }
-window.addEventListener('load', () => setTimeout(loadMaterialsFromSheet, 700));
+window.addEventListener('load', () => setTimeout(loadMaterialsFromSheet, 500));
 
 // ===== 材料マスター =====
 function addMaterialMasterV2() {
