@@ -11645,6 +11645,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     tbody.innerHTML = '';
 
     syncMaterialStockDataFromMasterV2();
+    autoRegisterMissingMaterials();
 
     // 🧪 上段（この表）＝ 生産実績ベース: 実際に生産した数量から材料消費量(kg)を集計する
     const actualUsageByMatName = computeActualConsumedKgByMaterial();
@@ -13173,7 +13174,26 @@ function renderBomTable() {
 function computeReorderSuggestions(includeAll) {
   const todayStr = formatDateLocal(new Date());
 
-  return materialMasterV2.map(m => {
+  // 🧪 対象材料は「①材料マスター登録済み」だけでなく、上段の材料一覧と同じ
+  // getAllMaterialNames()（製品マスター／注文に書かれているだけの未登録材料も含む）
+  // に揃える。①未登録の材料は、安全在庫・リードタイム等が未設定(0)の仮データとして扱う。
+  const allMatNames = (typeof getAllMaterialNames === 'function') ? getAllMaterialNames() : materialMasterV2.map(m => String(m.name).trim());
+  const materialsForCalc = allMatNames.map(matName => {
+    const existing = materialMasterV2.find(m => String(m.name).trim() === matName);
+    return existing || {
+      id: matName,
+      name: matName,
+      currentStock: 0,
+      unit: 'kg',
+      safetyStock: 0,
+      leadTime: 0,
+      supplier: '',
+      unitPrice: 0,
+      _unregistered: true // ①材料マスター未登録のため、暫定値で計算していることを示すフラグ
+    };
+  });
+
+  return materialsForCalc.map(m => {
     // 1. 未完了受注（未生産残数）に基づく必要材料量の計算（受注ベース引当予約）
     let reservedDemandQty = 0;
     let earliestDueDate = null;
@@ -13362,7 +13382,7 @@ function renderReorderSuggestions() {
   }
   tbody.innerHTML = suggestions.map(s => `
     <tr style="${s.isUrgent ? 'background:#fef2f2;' : ''}">
-      <td><strong>${s.material.name}</strong></td>
+      <td><strong>${s.material.name}</strong>${s.material._unregistered ? '<br><span style="font-size:0.65rem; color:#dc2626;">⚠️ ①材料マスター未登録</span>' : ''}</td>
       <td>${s.currentStock} ${s.material.unit}</td>
       <td style="color:#0284c7; font-weight:600;">+${s.pendingPoQty} ${s.material.unit}</td>
       <td style="color:#dc2626; font-weight:bold;">-${s.reservedDemandQty} ${s.material.unit}</td>
@@ -13534,7 +13554,39 @@ function renderConsumptionActualsTable() {
   `).join('');
 }
 
+// 🧪 materialMasterV2 を唯一の正データにするための自動補完処理。
+// 製品マスターの「使用材料」欄や注文の「材料」欄に、①材料マスター未登録の材料名が
+// 書かれている場合、自動的に materialMasterV2 へ仮登録する（安全在庫・リードタイムは0で仮登録）。
+// これにより、上段の材料一覧・①材料マスター・③発注提案が常に同じデータを参照するようになる。
+function autoRegisterMissingMaterials() {
+  if (!Array.isArray(materialMasterV2)) materialMasterV2 = [];
+  const existingNames = new Set(materialMasterV2.filter(m => m && m.name).map(m => String(m.name).trim()));
+  const allNames = (typeof getAllMaterialNames === 'function') ? getAllMaterialNames() : [];
+  let added = false;
+
+  allNames.forEach(name => {
+    if (!name || existingNames.has(name)) return;
+    materialMasterV2.push({
+      id: materialSeq++,
+      name: name,
+      currentStock: 0,
+      unit: 'kg',
+      safetyStock: 0,
+      monthlyConsumption: 0,
+      leadTime: 0,
+      supplier: '',
+      unitPrice: 0
+    });
+    existingNames.add(name);
+    added = true;
+  });
+
+  if (added) saveSharedMaterialData();
+  return added;
+}
+
 function renderMaterialOrderingTab() {
+  autoRegisterMissingMaterials();
   renderMaterialMasterV2Table();
   renderBomMaterialOptions();
   renderBomTable();
