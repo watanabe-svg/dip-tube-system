@@ -2391,22 +2391,13 @@
         <p id="msRuleElem" style="font-size:0.75rem; color:#0d9488; font-weight:600; margin-top:-5px;">
           💡 <strong>材料計算ルール（実績ベース）:</strong> 【実績消費量(累計)】は「実際に入力された生産実績数 × 1個当たり重量g × <strong>係数1.1</strong>」をBOM/製品マスターに基づき集計したものです。現在庫はここでは自動減算されず、手入力・入荷登録・実地棚卸しの値をそのまま表示します。
         </p>
-        <p id="msMrpRuleElem" data-i18n="ms_mrp_rule" style="font-size:0.75rem; color:#7c3aed; font-weight:600; margin-top:2px;">
-          🧪 <strong>発注予測ルール（生産計画ベース）:</strong> 「発注予測」列は、今現在入っている生産計画（まだ生産していない受注残）から下表③と同じロジックで自動算出しています。対象受注の最短納期からリードタイム分遡った日を<strong>発注推奨日</strong>、不足分を<strong>推奨発注量</strong>として表示します（③の表と完全に連動）。
+        <p id="msMrpRuleElem" style="font-size:0.75rem; color:#7c3aed; font-weight:600; margin-top:2px;">
+          🧪 <strong>発注予測ルール（生産計画ベース＋将来需要込み）:</strong> 「発注予測」列は、今現在入っている生産計画（まだ生産していない受注残）から下表③と同じロジックで自動算出しています。対象受注の最短納期からリードタイム分遡った日を<strong>発注推奨日</strong>として表示します。<strong>推奨発注量</strong>は「受注残の不足分」だけでなく、「<strong>想定月次需要</strong>（来月以降も同程度の生産が続くと見込んだ量。直近実績の自動平均、または手動設定値）」も加算した量です（③の表と完全に連動）。
         </p>
 
 
-        <div style="background:#f0fdf4; padding:12px; border-radius:6px; border:1px solid #86efac; margin-bottom:15px; max-width:750px;">
-          <strong id="msAddHeaderElem" style="font-size:0.85rem; color:#15803d;">➕ 新規材料の直接手動登録 / 在庫追加:</strong>
-          <p id="msAddNoticeElem" style="font-size:0.75rem; color:#64748b; margin:4px 0;">※製品マスターやオーダーに未登録の材料単体でも事前に在庫・入荷予定を登録できます。</p>
-          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1fr; gap:8px; margin-top:8px;">
-            <input type="text" id="addMatName" placeholder="材料名 (例: PVC-02)">
-            <input type="number" id="addMatStockKg" placeholder="現在庫 (kg)" step="0.1">
-            <input type="number" id="addMatLeadTime" data-i18n-placeholder="ph_add_mat_lead_time" placeholder="リードタイム(日)" step="1" min="0">
-            <input type="date" id="addMatArrivalDate" title="次回入荷予定日">
-            <input type="number" id="addMatArrivalKg" placeholder="入荷量 (kg)" step="0.1">
-            <button id="btnAddMatElem" type="button" onclick="addNewMaterialDirect()" style="background:#10b981;">材料新規登録</button>
-          </div>
+        <div style="background:#f0fdf4; padding:10px 14px; border-radius:6px; border:1px solid #86efac; margin-bottom:15px; max-width:750px; font-size:0.8rem; color:#15803d;">
+          ➕ <strong>新規材料の登録</strong>は下の「① 材料マスター」の登録フォームから行ってください。登録すると自動でこの一覧にも表示され、リードタイム・安全在庫・現在庫・想定月次需要はこの表（上段）でそのまま編集できます。
         </div>
 
 
@@ -2420,6 +2411,7 @@
                 <th id="thMsCurrentStock" style="background:#eff6ff;">現在庫量 (kg)<br><span style="font-size:0.65rem; font-weight:normal;">(実績ベース・手入力)</span></th>
                 <th id="thMsTotalReq" style="background:#fef3c7;">実績消費量 (累計kg)<br><span style="font-size:0.65rem; font-weight:normal;">(生産実績ベース)</span></th>
                 <th id="thMsRemaining" style="background:#f0fdf4;">現在庫 − 安全在庫 (kg)</th>
+                <th id="thMsForecastDemand" style="background:#fdf4ff;">想定月次需要 (kg)<br><span style="font-size:0.65rem; font-weight:normal;">(自動平均・上書き可／推奨発注量に加算)</span></th>
                 <th id="thMsArrivalDate">次回入荷予定日</th>
                 <th id="thMsArrivalKg">次回入荷予定量 (kg)</th>
                 <th id="thMsDepletion" data-i18n="th_ms_depletion" style="background:#fee2e2;">対象受注 最短納期<br><span style="font-size:0.65rem; font-weight:normal;">(計画ベース)</span></th>
@@ -2447,14 +2439,14 @@
           </div>
         </div>
 
-        <h3 style="font-size:0.95rem; color:#2563eb; border-bottom:1px solid #cbd5e1; padding-bottom:4px; margin-top:20px;">① 材料マスター</h3>
+        <h3 style="font-size:0.95rem; color:#2563eb; border-bottom:1px solid #cbd5e1; padding-bottom:4px; margin-top:20px;">① 材料マスター（新規登録）</h3>
+        <p style="font-size:0.75rem; color:#64748b; margin:2px 0 8px;">💡 ここは<strong>新規材料の登録</strong>専用です。登録後の現在庫・安全在庫・リードタイム・想定月次需要は、上段の一覧表から直接編集してください（ここでの編集は不要です）。</p>
         <div style="background:#f0fdf4; padding:10px; border-radius:6px; border:1px solid #86efac; margin-bottom:10px;">
-          <div style="display:grid; grid-template-columns: 1.3fr 1fr 0.7fr 1fr 1fr 0.8fr 1.2fr 1fr; gap:6px;">
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr 0.7fr 1fr 0.8fr 1.2fr 1fr; gap:6px;">
             <input type="text" id="mm2Name" placeholder="材料名">
             <input type="number" id="mm2CurrentStock" placeholder="現在在庫" step="0.1">
             <input type="text" id="mm2Unit" placeholder="単位(kg等)">
             <input type="number" id="mm2SafetyStock" placeholder="安全在庫" step="0.1">
-            <input type="number" id="mm2MonthlyConsumption" placeholder="月間消費" step="0.1">
             <input type="number" id="mm2LeadTime" placeholder="リードタイム(日)" step="1">
             <input type="text" id="mm2Supplier" placeholder="サプライヤー">
             <input type="number" id="mm2UnitPrice" placeholder="単価">
@@ -2464,34 +2456,37 @@
         <div style="overflow-x:auto; border:1px solid var(--border-color); margin-bottom:20px;">
           <table class="data-table">
             <thead><tr>
-              <th>ID</th><th>材料名</th><th>現在在庫</th><th>単位</th><th>安全在庫</th><th>月間消費</th><th>リードタイム</th><th>サプライヤー</th><th>単価</th><th></th>
+              <th>ID</th><th>材料名</th><th>単位</th><th>サプライヤー</th><th>単価</th><th></th>
             </tr></thead>
             <tbody id="mm2TableBody"></tbody>
           </table>
         </div>
 
-        <h3 style="font-size:0.95rem; color:#2563eb; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">② BOM（品目ごとの材料使用量）</h3>
-        <div style="background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe; margin-bottom:10px;">
-          <div style="display:grid; grid-template-columns: 1.3fr 1.3fr 0.8fr 0.7fr 1.5fr; gap:6px;">
-            <input type="text" id="bomProductName" placeholder="品目名（製品マスターの名前と一致させる）">
-            <select id="bomMaterialSelect"></select>
-            <input type="number" id="bomQty" placeholder="使用量" step="0.01">
-            <input type="text" id="bomUnit" placeholder="単位(g等)" value="g">
-            <input type="text" id="bomNote" placeholder="備考">
+        <details style="margin-bottom:20px;">
+          <summary style="cursor:pointer; font-size:0.95rem; color:#2563eb; border-bottom:1px solid #cbd5e1; padding-bottom:4px; font-weight:bold;">② BOM（品目ごとの材料使用量） <span style="font-size:0.7rem; color:#64748b; font-weight:normal;">※通常は操作不要（クリックで表示）</span></summary>
+          <p style="font-size:0.72rem; color:#64748b; margin:6px 0;">💡 品目名にBOMが未登録の場合は、製品マスターの重量情報から自動で計算されます。個別に材料使用量を厳密指定したい品目だけ、ここで登録してください。</p>
+          <div style="background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe; margin-bottom:10px;">
+            <div style="display:grid; grid-template-columns: 1.3fr 1.3fr 0.8fr 0.7fr 1.5fr; gap:6px;">
+              <input type="text" id="bomProductName" placeholder="品目名（製品マスターの名前と一致させる）">
+              <select id="bomMaterialSelect"></select>
+              <input type="number" id="bomQty" placeholder="使用量" step="0.01">
+              <input type="text" id="bomUnit" placeholder="単位(g等)" value="g">
+              <input type="text" id="bomNote" placeholder="備考">
+            </div>
+            <button type="button" onclick="addBomEntry()" style="background:#2563eb; width:auto; padding:6px 16px; margin-top:8px;">➕ BOMへ追加</button>
           </div>
-          <button type="button" onclick="addBomEntry()" style="background:#2563eb; width:auto; padding:6px 16px; margin-top:8px;">➕ BOMへ追加</button>
-        </div>
-        <div style="overflow-x:auto; border:1px solid var(--border-color); margin-bottom:20px;">
-          <table class="data-table">
-            <thead><tr><th>品目名</th><th>材料ID</th><th>使用量</th><th>単位</th><th>備考</th><th></th></tr></thead>
-            <tbody id="bomTableBody"></tbody>
-          </table>
-        </div>
+          <div style="overflow-x:auto; border:1px solid var(--border-color);">
+            <table class="data-table">
+              <thead><tr><th>品目名</th><th>材料ID</th><th>使用量</th><th>単位</th><th>備考</th><th></th></tr></thead>
+              <tbody id="bomTableBody"></tbody>
+            </table>
+          </div>
+        </details>
 
         <h3 style="font-size:0.95rem; color:#dc2626; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">③ 受注・発注残連動 発注提案（有効在庫ベース）</h3>
         <div style="overflow-x:auto; border:1px solid var(--border-color); margin-bottom:20px;">
           <table class="data-table">
-            <thead><tr><th>材料名</th><th>現在庫</th><th>発注残(入荷待ち)</th><th>未生産受注引当</th><th>有効在庫</th><th>安全在庫</th><th>推奨発注量</th><th>発注期限/サプライヤー</th><th>操作</th></tr></thead>
+            <thead><tr><th>材料名</th><th>現在庫</th><th>発注残(入荷待ち)</th><th>未生産受注引当</th><th>有効在庫</th><th>安全在庫</th><th style="background:#fdf4ff;">想定将来需要<br><span style="font-size:0.65rem; font-weight:normal;">(来月以降見込み)</span></th><th>推奨発注量<br><span style="font-size:0.65rem; font-weight:normal;">(安全在庫+将来需要まで)</span></th><th>発注期限/サプライヤー</th><th>操作</th></tr></thead>
             <tbody id="reorderTableBody"></tbody>
           </table>
         </div>
@@ -3712,7 +3707,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_ps_action: "操作",
 
       ms_title: "🧪 材料管理（在庫・発注） - DIP/Tube共通",
-      ms_rule: "💡 <strong>材料計算ルール:</strong> 【全計画必要材料量】は「(必要生産数 × 1個当たり重量g × <strong>係数1.1</strong>) ÷ 1000 + <strong>材料変更時の初期準備材料量(kg)</strong>」で自動計算されています。",
+      ms_rule: "💡 <strong>材料計算ルール（実績ベース）:</strong> 【実績消費量(累計)】は「実際に入力された生産実績数 × 1個当たり重量g × <strong>係数1.1</strong>」をBOM/製品マスターに基づき集計したものです。現在庫はここでは自動減算されず、手入力・入荷登録・実地棚卸しの値をそのまま表示します。",
       ms_mrp_rule: "🧪 <strong>MRP自動算出ルール:</strong> カレンダーの日割り生産計画から日別材料消費量を計算し、在庫が「安全在庫量」を下回る最初の日を<strong>枯渇予測日</strong>、そこから<strong>リードタイム(日)</strong>分遡った日を<strong>発注推奨日</strong>として自動算出します。",
       ms_add_header: "➕ 新規材料の直接手動登録 / 在庫追加:",
       ms_add_notice: "※製品マスターやオーダーに未登録の材料単体でも事前に在庫・入荷予定を登録できます。",
@@ -3722,7 +3717,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       btn_add_mat: "材料新規登録",
       th_ms_mat_name: "材料名",
       th_ms_current_stock: "現在庫量 (kg)",
-      th_ms_total_req: "全計画必要材料量 (kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(ロス1.1倍＋段替え初期準備込)</span>",
+      th_ms_total_req: "実績消費量 (累計kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(生産実績ベース)</span>",
       th_ms_remaining: "計画残り材料量 (kg)",
       th_ms_arrival_date: "次回入荷予定日",
       th_ms_arrival_kg: "次回入荷予定量 (kg)",
@@ -4377,7 +4372,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_ps_action: "Action",
 
       ms_title: "🧪 Material Management (Stock & Ordering) - Shared DIP/Tube",
-      ms_rule: "💡 <strong>Material Calculation Rule:</strong> Total Req. Material = (Required Production Pcs × Weight/pc(g) × <strong>1.1 Loss Factor</strong>) ÷ 1000 + <strong>Initial Prep Material (kg)</strong>.",
+      ms_rule: "💡 <strong>Material Calculation Rule (actuals-based):</strong> Cumulative Consumed Qty = Actual production pcs entered × Weight/pc(g) × <strong>1.1 Loss Factor</strong>, aggregated via BOM/product master. Current stock is not auto-deducted here — it always shows the manually entered / received / physically counted value.",
       ms_mrp_rule: "🧪 <strong>MRP Auto-Calculation Rule:</strong> Daily material consumption is calculated from the day-by-day calendar production plan. The first day stock falls below the <strong>safety stock</strong> becomes the <strong>Est. Depletion Date</strong>, and that date minus the <strong>lead time (days)</strong> becomes the <strong>Suggested Order Date</strong>.",
       ms_add_header: "➕ Manual Registration / Add New Material Stock:",
       ms_add_notice: "*You can register material inventory in advance even if it is not yet linked to a model or order.",
@@ -4387,7 +4382,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       btn_add_mat: "Register New Material",
       th_ms_mat_name: "Material Name",
       th_ms_current_stock: "Current Stock (kg)",
-      th_ms_total_req: "Total Planned Req. (kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(1.1x Loss + Prep Included)</span>",
+      th_ms_total_req: "Cumulative Consumed (kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(Actuals-based)</span>",
       th_ms_remaining: "Planned Remaining (kg)",
       th_ms_arrival_date: "Next Arrival Date",
       th_ms_arrival_kg: "Next Arrival Qty (kg)",
@@ -5043,7 +5038,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_ps_action: "จัดการ",
 
       ms_title: "🧪 จัดการวัตถุดิบ (สต็อก・การสั่งซื้อ) - ใช้ร่วมกัน DIP/Tube",
-      ms_rule: "💡 <strong>สูตรคำนวณวัตถุดิบ:</strong> วัตถุดิบที่ต้องใช้ทั้งหมด = (จำนวนที่ผลิต × น้ำหนักต่อชิ้น g × <strong>ตัวคูณ 1.1</strong>) ÷ 1000 + <strong>วัตถุดิบเตรียมเริ่มต้น (kg)</strong>",
+      ms_rule: "💡 <strong>สูตรคำนวณวัตถุดิบ (อิงผลผลิตจริง):</strong> ยอดใช้สะสม = จำนวนผลิตจริงที่บันทึก × น้ำหนักต่อชิ้น g × <strong>ตัวคูณ 1.1</strong> (รวมตาม BOM/มาสเตอร์สินค้า) สต็อกปัจจุบันจะไม่ถูกหักอัตโนมัติ แสดงค่าที่กรอกเอง/รับเข้า/นับสต็อกจริงเท่านั้น",
       ms_mrp_rule: "🧪 <strong>กฎการคำนวณ MRP อัตโนมัติ:</strong> คำนวณการใช้วัตถุดิบรายวันจากแผนการผลิตในปฏิทิน วันแรกที่สต็อกต่ำกว่า <strong>สต็อกความปลอดภัย</strong> จะเป็น <strong>วันที่คาดว่าจะหมด</strong> และวันนั้นลบด้วย <strong>ระยะเวลานำ (วัน)</strong> จะเป็น <strong>วันแนะนำให้สั่งซื้อ</strong>",
       ms_add_header: "➕ เพิ่มวัตถุดิบใหม่โดยตรง / เพิ่มสต็อก:",
       ms_add_notice: "*สามารถลงทะเบียนวัตถุดิบล่วงหน้าได้แม้ยังไม่มีรายการสั่งซื้อ",
@@ -5053,7 +5048,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       btn_add_mat: "ลงทะเบียนวัตถุดิบใหม่",
       th_ms_mat_name: "ชื่อวัตถุดิบ",
       th_ms_current_stock: "สต็อกปัจจุบัน (kg)",
-      th_ms_total_req: "วัตถุดิบที่ต้องใช้รวม (kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(รวมสูญเสีย 1.1 เท่า + วัตถุดิบเตรียม)</span>",
+      th_ms_total_req: "ยอดใช้สะสม (kg)<br><span style='font-size:0.65rem; font-weight:normal;'>(อิงผลผลิตจริง)</span>",
       th_ms_remaining: "วัตถุดิบคงเหลือตามแผน (kg)",
       th_ms_arrival_date: "วันวัตถุดิบเข้าครั้งถัดไป",
       th_ms_arrival_kg: "จำนวนวัตถุดิบเข้าครั้งถัดไป (kg)",
@@ -11656,7 +11651,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     const matKeys = getAllMaterialNames().slice().sort();
 
     if (matKeys.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8; padding:15px;">${tr("msg_no_materials_registered")}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#94a3b8; padding:15px;">${tr("msg_no_materials_registered")}</td></tr>`;
       return;
     }
 
@@ -11673,6 +11668,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       const nextArrivalKg = stockInfo.nextArrivalKg || 0;
       const leadTimeDays = stockInfo.leadTimeDays || 0;
       const safetyStockKg = stockInfo.safetyStockKg || 0;
+      const forecastInfo = getEffectiveForecastMonthlyKg(matName);
 
       const t = translations[currentLang] || translations.ja;
       let statusHtml = '';
@@ -11721,6 +11717,13 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
         <td style="background:#fef3c7; font-weight:bold; color:#b45309;">${actualUsedKg.toFixed(1)} kg</td>
         <td style="background:#f0fdf4; font-weight:bold; color:${(currentStockKg - safetyStockKg) >= 0 ? '#15803d' : '#ef4444'};">
           ${(currentStockKg - safetyStockKg).toFixed(1)} kg
+        </td>
+        <td style="background:#fdf4ff;">
+          <input type="number" class="input-inline" style="width:80px;" value="${forecastInfo.value}" step="0.1" min="0"
+            onchange="updateMaterialForecastDemand('${matName.replace(/'/g, "\\'")}', this.value)"> kg<br>
+          ${forecastInfo.isManual
+            ? `<span style="font-size:0.65rem; color:#7c3aed;">✋ 手動設定 <a href="javascript:void(0)" onclick="resetMaterialForecastToAuto('${matName.replace(/'/g, "\\'")}')" style="color:#0284c7;">(自動に戻す)</a></span>`
+            : `<span style="font-size:0.65rem; color:#64748b;">🤖 自動(直近実績平均)</span>`}
         </td>
         <td>
           <input type="date" class="input-inline" style="width:125px;" value="${stockInfo.nextArrivalDate || ''}" 
@@ -11985,36 +11988,6 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     closeProdCheckModal();
     calculate();
     alert(tr('msg_prodcheck_saved', { name: modelName }));
-  }
-
-  function addNewMaterialDirect() {
-    const matName = document.getElementById('addMatName').value.trim();
-    const stockKg = parseFloat(document.getElementById('addMatStockKg').value) || 0;
-    const leadTimeDays = Math.max(0, parseInt(document.getElementById('addMatLeadTime').value) || 0);
-    const arrivalDate = normalizeDateStr(document.getElementById('addMatArrivalDate').value || '');
-    const arrivalKg = parseFloat(document.getElementById('addMatArrivalKg').value) || 0;
-
-    if (!matName) return alert(tr('msg_enter_material_name'));
-    pushUndoState();
-
-    materialStockData[matName] = {
-      currentStockKg: stockKg,
-      leadTimeDays: leadTimeDays,
-      nextArrivalDate: arrivalDate,
-      nextArrivalKg: arrivalKg,
-      safetyStockKg: 0
-    };
-
-    document.getElementById('addMatName').value = '';
-    document.getElementById('addMatStockKg').value = '';
-    document.getElementById('addMatLeadTime').value = '';
-    document.getElementById('addMatArrivalDate').value = '';
-    document.getElementById('addMatArrivalKg').value = '';
-
-    saveData();
-    saveSharedMaterialData();
-    renderMaterialStockTable();
-    alert(tr('msg_material_registered', { name: matName }));
   }
 
   function removeMaterialStock(matName) {
@@ -13046,13 +13019,14 @@ function addMaterialMasterV2() {
     currentStock: parseFloat(document.getElementById('mm2CurrentStock').value) || 0,
     unit: document.getElementById('mm2Unit').value.trim() || 'kg',
     safetyStock: parseFloat(document.getElementById('mm2SafetyStock').value) || 0,
-    monthlyConsumption: parseFloat(document.getElementById('mm2MonthlyConsumption').value) || 0,
+    monthlyConsumption: 0, // 想定月次需要は生産実績が貯まり次第、自動平均で算出される（上段テーブルで手動上書きも可）
+    monthlyConsumptionManual: false,
     leadTime: parseInt(document.getElementById('mm2LeadTime').value) || 0,
     supplier: document.getElementById('mm2Supplier').value.trim() || '',
     unitPrice: parseFloat(document.getElementById('mm2UnitPrice').value) || 0
   };
   materialMasterV2.push(item);
-  ['mm2Name','mm2CurrentStock','mm2SafetyStock','mm2MonthlyConsumption','mm2LeadTime','mm2Supplier','mm2UnitPrice'].forEach(id => {
+  ['mm2Name','mm2CurrentStock','mm2SafetyStock','mm2LeadTime','mm2Supplier','mm2UnitPrice'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   syncMaterialStockDataFromMasterV2();
@@ -13095,18 +13069,14 @@ function renderMaterialMasterV2Table() {
   const tbody = document.getElementById('mm2TableBody');
   if (!tbody) return;
   if (materialMasterV2.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding:15px;">材料が登録されていません</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:15px;">材料が登録されていません</td></tr>';
     return;
   }
   tbody.innerHTML = materialMasterV2.map(m => `
     <tr>
       <td>${m.id}</td>
-      <td><input type="text" value="${m.name}" onchange="updateMaterialMasterV2Field('${m.id}','name',this.value)" style="width:110px;"></td>
-      <td><input type="number" value="${m.currentStock}" step="0.1" onchange="updateMaterialMasterV2Field('${m.id}','currentStock',this.value)" style="width:75px;"></td>
+      <td><strong>${m.name}</strong><br><span style="font-size:0.65rem; color:#64748b;">在庫/安全在庫/リードタイム/想定需要は上段の一覧表で編集</span></td>
       <td><input type="text" value="${m.unit}" onchange="updateMaterialMasterV2Field('${m.id}','unit',this.value)" style="width:50px;"></td>
-      <td><input type="number" value="${m.safetyStock}" step="0.1" onchange="updateMaterialMasterV2Field('${m.id}','safetyStock',this.value)" style="width:75px;"></td>
-      <td><input type="number" value="${m.monthlyConsumption}" step="0.1" onchange="updateMaterialMasterV2Field('${m.id}','monthlyConsumption',this.value)" style="width:80px;"></td>
-      <td><input type="number" value="${m.leadTime}" step="1" onchange="updateMaterialMasterV2Field('${m.id}','leadTime',this.value)" style="width:60px;"></td>
       <td><input type="text" value="${m.supplier}" onchange="updateMaterialMasterV2Field('${m.id}','supplier',this.value)" style="width:100px;"></td>
       <td><input type="number" value="${m.unitPrice}" step="1" onchange="updateMaterialMasterV2Field('${m.id}','unitPrice',this.value)" style="width:70px;"></td>
       <td><button type="button" onclick="removeMaterialMasterV2('${m.id}')" style="background:#ef4444; width:auto; padding:3px 8px; font-size:0.75rem;">削除</button></td>
@@ -13285,9 +13255,17 @@ function computeReorderSuggestions(includeAll) {
     const leadTime = parseInt(m.leadTime) || 0;
     const availableStock = Math.round((currentStock + pendingPoQty - reservedDemandQty) * 10) / 10;
 
-    // 4. 発注判定: 有効在庫が安全在庫を下回る、またはマイナスの場合
-    const shortage = Math.max(0, safetyStock - availableStock);
-    const needsOrder = availableStock < safetyStock || shortage > 0;
+    // 3.5 想定将来需要（まだ受注として登録されていない、来月以降も同程度続くと見込まれる消費量）
+    //     ①材料マスターで手動上書きされていればその値、無ければ直近の生産実績（最大3ヶ月平均）から自動算出。
+    const forecastDemandQty = (typeof getEffectiveForecastMonthlyKg === 'function')
+      ? getEffectiveForecastMonthlyKg(m.name).value
+      : 0;
+
+    // 4. 発注判定: 「安全在庫 ＋ 想定将来需要」まで有効在庫を確保できているかで判定する。
+    //    現在の受注残の不足分だけでなく、来月も同規模の生産が入ることを見込んだ量を加算する。
+    const shortage = Math.max(0, safetyStock - availableStock); // 参考値：受注残＋安全在庫だけを見た場合の不足分
+    const forecastCoveredNeed = Math.max(0, (safetyStock + forecastDemandQty) - availableStock);
+    const needsOrder = forecastCoveredNeed > 0;
 
     // 5. 発注期限の逆算
     let orderDeadline = null;
@@ -13302,8 +13280,8 @@ function computeReorderSuggestions(includeAll) {
       isUrgent = needsOrder;
     }
 
-    // 6. 推奨発注量: 不足分をカバー（端数繰り上げ）
-    const suggestedQty = needsOrder ? Math.ceil(shortage * 10) / 10 : 0;
+    // 6. 推奨発注量: 「受注残分の不足」＋「想定将来需要（来月以降分の見込み）」の両方をカバー（端数繰り上げ）
+    const suggestedQty = needsOrder ? Math.ceil(forecastCoveredNeed * 10) / 10 : 0;
 
     return {
       material: m,
@@ -13313,7 +13291,9 @@ function computeReorderSuggestions(includeAll) {
       reservedDemandQty,
       availableStock,
       safetyStock,
-      reorderPoint: safetyStock + reservedDemandQty,
+      forecastDemandQty,
+      shortageToSafetyOnly: shortage,
+      reorderPoint: safetyStock + reservedDemandQty + forecastDemandQty,
       needsOrder,
       suggestedQty,
       earliestDueDate,
@@ -13372,12 +13352,132 @@ function computeActualConsumedKgByMaterial() {
   return usageByMatName;
 }
 
+// 🧪 生産実績（dailyActuals）ベースで、指定した対象月(YYYY-MM)のみの材料消費量(kg)を算出する
+// （computeActualConsumedKgByMaterial と同じロジックだが、対象月でフィルタする）
+function computeActualConsumedKgByMaterialForMonth(targetMonth) {
+  const usageByMatName = {};
+  if (!dailyActuals || typeof dailyActuals !== 'object') return usageByMatName;
+
+  Object.keys(dailyActuals).forEach(key => {
+    const dateMatch = key.match(/\d{4}-\d{2}-\d{2}/);
+    if (!dateMatch || !dateMatch[0].startsWith(targetMonth)) return;
+
+    const actualQty = Number(dailyActuals[key]) || 0;
+    if (!actualQty) return;
+    const orderId = key.split('_')[0];
+    const order = Array.isArray(orders) ? orders.find(o => String(o.id) === String(orderId)) : null;
+    if (!order) return;
+    const productName = order.name;
+
+    const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => b.productName === productName);
+    if (matchedBoms.length > 0) {
+      matchedBoms.forEach(b => {
+        const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId) || String(m.name).trim() === String(b.materialId).trim());
+        const matName = mat ? String(mat.name).trim() : String(b.materialId || '').trim();
+        if (!matName) return;
+        const bQty = parseFloat(b.qty) || 0;
+        const bUnit = (b.unit || 'g').toLowerCase();
+        const kgPerPcs = (bUnit === 'kg') ? bQty : (bQty / 1000);
+        usageByMatName[matName] = (usageByMatName[matName] || 0) + actualQty * kgPerPcs * 1.1;
+      });
+    } else {
+      const masterItem = Array.isArray(masterData) ? masterData.find(m => m.name === productName) : null;
+      const matName = (order.material || (masterItem ? (masterItem.material || (masterItem.materials && masterItem.materials[0])) : '') || '').trim();
+      if (!matName) return;
+      let usageG = masterItem ? (masterItem.materialUsageG || masterItem.weight || 0) : 0;
+      if (usageG === 0 && masterItem && masterItem.rollWeight) {
+        usageG = (parseFloat(masterItem.rollWeight) || 0) * 1000;
+      }
+      const kgPerPcs = (usageG * 1.1) / 1000;
+      usageByMatName[matName] = (usageByMatName[matName] || 0) + actualQty * kgPerPcs;
+    }
+  });
+
+  return usageByMatName;
+}
+
+// 🧪 対象材料の「想定月次需要(kg)」を、生産実績のある直近の完了月（最大3ヶ月）の平均から自動算出する。
+// 実績データが全く無い月はカウントしない（実稼働期間だけで平均するため）。
+// 対象月分の実績が完全に揃っていない当月は含めず、過去の「完了月」のみを対象にする。
+function computeAutoForecastMonthlyKg(matName, monthsBack) {
+  monthsBack = monthsBack || 3;
+  const now = new Date();
+  const qualifyingMonths = [];
+  let cursor = new Date(now.getFullYear(), now.getMonth(), 1); // 当月の1日
+  let guard = 0;
+  while (qualifyingMonths.length < monthsBack && guard < 24) {
+    guard++;
+    cursor.setMonth(cursor.getMonth() - 1); // 1ヶ月前へ（＝当月は含めない＝完了月のみ）
+    const ym = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+    const hasAnyActualsInMonth = Object.keys(dailyActuals || {}).some(k => {
+      const m = k.match(/\d{4}-\d{2}-\d{2}/);
+      return m && m[0].startsWith(ym);
+    });
+    if (hasAnyActualsInMonth) qualifyingMonths.push(ym);
+  }
+
+  if (qualifyingMonths.length === 0) return 0;
+
+  let total = 0;
+  qualifyingMonths.forEach(ym => {
+    const usage = computeActualConsumedKgByMaterialForMonth(ym);
+    total += usage[matName] || 0;
+  });
+  return Math.round((total / qualifyingMonths.length) * 10) / 10;
+}
+
+// 🧪 対象材料の「実効・想定月次需要(kg)」を返す。①材料マスターで手動上書き(monthlyConsumptionManual)されて
+// いればその値、されていなければ直近実績からの自動平均（毎回再計算）を使う。
+// 推奨発注量の算出（computeReorderSuggestions）はこの値を「安全在庫に上乗せすべき将来需要」として使用する。
+function getEffectiveForecastMonthlyKg(matName) {
+  const mm = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
+  if (mm && mm.monthlyConsumptionManual) {
+    return { value: parseFloat(mm.monthlyConsumption) || 0, isManual: true };
+  }
+  const auto = computeAutoForecastMonthlyKg(matName);
+  if (mm) mm.monthlyConsumption = auto; // 参照用に同期しておく（保存時にも自動値が乗る）
+  return { value: auto, isManual: false };
+}
+
+// 🧪 想定月次需要のインライン手動上書きハンドラ（上段テーブルから直接編集）
+function updateMaterialForecastDemand(matName, value) {
+  pushUndoState();
+  let mm = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
+  if (!mm) {
+    mm = {
+      id: materialSeq++, name: matName, currentStock: 0, unit: 'kg',
+      safetyStock: 0, monthlyConsumption: 0, leadTime: 0, supplier: '', unitPrice: 0
+    };
+    materialMasterV2.push(mm);
+  }
+  mm.monthlyConsumption = Math.max(0, parseFloat(value) || 0);
+  mm.monthlyConsumptionManual = true;
+  saveData();
+  saveSharedMaterialData();
+  calculate();
+  if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
+  scheduleMaterialSync();
+}
+
+// 🧪 想定月次需要を手動設定から自動算出（直近実績平均）に戻す
+function resetMaterialForecastToAuto(matName) {
+  const mm = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
+  if (!mm) return;
+  pushUndoState();
+  mm.monthlyConsumptionManual = false;
+  saveData();
+  saveSharedMaterialData();
+  calculate();
+  if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
+  scheduleMaterialSync();
+}
+
 function renderReorderSuggestions() {
   const tbody = document.getElementById('reorderTableBody');
   if (!tbody) return;
   const suggestions = computeReorderSuggestions();
   if (suggestions.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#10b981; font-weight:bold; padding:15px;">✔ すべての受注に対して材料在庫・発注残が確保されています（発注不要）</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#10b981; font-weight:bold; padding:15px;">✔ すべての受注＋来月以降の想定需要に対して材料在庫・発注残が確保されています（発注不要）</td></tr>';
     return;
   }
   tbody.innerHTML = suggestions.map(s => `
@@ -13388,6 +13488,7 @@ function renderReorderSuggestions() {
       <td style="color:#dc2626; font-weight:bold;">-${s.reservedDemandQty} ${s.material.unit}</td>
       <td style="font-weight:bold; color:${s.availableStock < 0 ? '#ef4444' : '#d97706'};">${s.availableStock} ${s.material.unit}</td>
       <td>${s.safetyStock} ${s.material.unit}</td>
+      <td style="background:#fdf4ff; color:#7c3aed;">${s.forecastDemandQty} ${s.material.unit}</td>
       <td style="color:#7c3aed; font-weight:bold; font-size:0.85rem;">${s.suggestedQty} ${s.material.unit}</td>
       <td>
         <span style="font-size:0.75rem;">${s.material.supplier || '-'}</span><br>
@@ -13440,11 +13541,20 @@ function updatePurchaseOrderStatus(orderId, newStatus) {
     const mat = materialMasterV2.find(m => String(m.id) === String(po.materialId));
     if (mat) {
       mat.currentStock = (mat.currentStock || 0) + (po.orderQty || 0);
+      // 材料在庫データ(上段テーブルの表示元)にも即座に反映する（従来ここが漏れており、上段が更新されない原因になっていた）
+      const matName = String(mat.name).trim();
+      if (matName) {
+        if (!materialStockData[matName]) {
+          materialStockData[matName] = { currentStockKg: 0, nextArrivalDate: '', nextArrivalKg: 0, leadTimeDays: 0, safetyStockKg: 0 };
+        }
+        materialStockData[matName].currentStockKg = mat.currentStock;
+      }
       renderMaterialMasterV2Table();
       renderReorderSuggestions();
     }
   }
   renderPurchaseOrdersTable();
+  if (typeof renderMaterialStockTable === 'function') renderMaterialStockTable();
   scheduleMaterialSync();
 }
 
