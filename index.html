@@ -2389,10 +2389,10 @@
         <h2 id="msTitleElem">🧪 材料管理（在庫・発注） <span id="materialSyncMsg" style="font-size:0.75rem; color:#10b981; font-weight:normal; margin-left:10px;"></span></h2>
         <p style="font-size:0.75rem; color:#64748b; margin-top:-8px;">💡 材料データはDIP/Tube共通です。カテゴリで分かれず、常に同じ材料リストを参照・編集します。</p>
         <p id="msRuleElem" style="font-size:0.75rem; color:#0d9488; font-weight:600; margin-top:-5px;">
-          💡 <strong>材料計算ルール:</strong> 【全計画必要材料量】は「(必要生産数 × 1個当たり重量g × <strong>係数1.1</strong>) ÷ 1000 + <strong>材料変更時の初期準備材料量(kg)</strong>」で自動計算されています。
+          💡 <strong>材料計算ルール（実績ベース）:</strong> 【実績消費量(累計)】は「実際に入力された生産実績数 × 1個当たり重量g × <strong>係数1.1</strong>」をBOM/製品マスターに基づき集計したものです。現在庫はここでは自動減算されず、手入力・入荷登録・実地棚卸しの値をそのまま表示します。
         </p>
         <p id="msMrpRuleElem" data-i18n="ms_mrp_rule" style="font-size:0.75rem; color:#7c3aed; font-weight:600; margin-top:2px;">
-          🧪 <strong>MRP自動算出ルール:</strong> カレンダーの日割り生産計画から日別材料消費量を計算し、在庫が「安全在庫量」を下回る最初の日を<strong>枯渇予測日</strong>、そこから<strong>リードタイム(日)</strong>分遡った日を<strong>発注推奨日</strong>として自動算出します。
+          🧪 <strong>発注予測ルール（生産計画ベース）:</strong> 「発注予測」列は、今現在入っている生産計画（まだ生産していない受注残）から下表③と同じロジックで自動算出しています。対象受注の最短納期からリードタイム分遡った日を<strong>発注推奨日</strong>、不足分を<strong>推奨発注量</strong>として表示します（③の表と完全に連動）。
         </p>
 
 
@@ -2417,15 +2417,15 @@
                 <th id="thMsMatName">材料名</th>
                 <th id="thMsLeadTime" data-i18n="th_ms_lead_time" style="background:#f5f3ff;">リードタイム(日)</th>
                 <th id="thMsSafetyStock" data-i18n="th_ms_safety_stock" style="background:#f5f3ff;">安全在庫 (kg)</th>
-                <th id="thMsCurrentStock" style="background:#eff6ff;">現在庫量 (kg)</th>
-                <th id="thMsTotalReq" style="background:#fef3c7;">全計画必要材料量 (kg)<br><span style="font-size:0.65rem; font-weight:normal;">(ロス1.1倍＋段替え初期準備込)</span></th>
-                <th id="thMsRemaining" style="background:#f0fdf4;">計画残り材料量 (kg)</th>
+                <th id="thMsCurrentStock" style="background:#eff6ff;">現在庫量 (kg)<br><span style="font-size:0.65rem; font-weight:normal;">(実績ベース・手入力)</span></th>
+                <th id="thMsTotalReq" style="background:#fef3c7;">実績消費量 (累計kg)<br><span style="font-size:0.65rem; font-weight:normal;">(生産実績ベース)</span></th>
+                <th id="thMsRemaining" style="background:#f0fdf4;">現在庫 − 安全在庫 (kg)</th>
                 <th id="thMsArrivalDate">次回入荷予定日</th>
                 <th id="thMsArrivalKg">次回入荷予定量 (kg)</th>
-                <th id="thMsDepletion" data-i18n="th_ms_depletion" style="background:#fee2e2;">枯渇予測日</th>
-                <th id="thMsSuggestDate" data-i18n="th_ms_suggest_date" style="background:#ede9fe;">発注推奨日</th>
-                <th id="thMsSuggestQty" data-i18n="th_ms_suggest_qty" style="background:#ede9fe;">推奨発注量 (kg)</th>
-                <th id="thMsRisk">在庫枯渇リスク判定</th>
+                <th id="thMsDepletion" data-i18n="th_ms_depletion" style="background:#fee2e2;">対象受注 最短納期<br><span style="font-size:0.65rem; font-weight:normal;">(計画ベース)</span></th>
+                <th id="thMsSuggestDate" data-i18n="th_ms_suggest_date" style="background:#ede9fe;">発注推奨日<br><span style="font-size:0.65rem; font-weight:normal;">(③と連動)</span></th>
+                <th id="thMsSuggestQty" data-i18n="th_ms_suggest_qty" style="background:#ede9fe;">推奨発注量 (kg)<br><span style="font-size:0.65rem; font-weight:normal;">(③と連動)</span></th>
+                <th id="thMsRisk">在庫状況</th>
                 <th id="thMsAction" style="width:90px;">操作</th>
               </tr>
             </thead>
@@ -11646,52 +11646,13 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
 
     syncMaterialStockDataFromMasterV2();
 
-    const materialMap = {};
+    // 🧪 上段（この表）＝ 生産実績ベース: 実際に生産した数量から材料消費量(kg)を集計する
+    const actualUsageByMatName = computeActualConsumedKgByMaterial();
+    // 🧪 下段（③ 発注提案）＝ 生産計画ベース: 未生産の受注残から発注要否を算出したものを、
+    //    この表の「発注予測」列にもそのまま使い、上段・下段の計算を完全に一致させる（連携）
+    const reorderMap = computeReorderSuggestionsMap();
 
-    // 1. 全登録材料を初期化
-    getAllMaterialNames().forEach(matName => {
-      if (!materialMap[matName]) materialMap[matName] = { requiredKg: 0 };
-    });
-
-    // 2. オーダー／計画から材料必要量を集計（BOM・製品マスター・Tube仕様に対応）
-    const planItems = (latestComputedResults && latestComputedResults.length > 0) ? latestComputedResults : orders;
-    planItems.forEach(res => {
-      const pcs = res.requiredProductionPcs !== undefined ? res.requiredProductionPcs : (res.orderQty || 0);
-      if (pcs <= 0) return;
-
-      const masterItem = Array.isArray(masterData) ? masterData.find(m => m.name === res.name) : null;
-      const defaultMat = (res.material || (masterItem ? (masterItem.material || (masterItem.materials && masterItem.materials[0])) : '') || '').trim();
-
-      // BOMからの照合
-      const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => b.productName === res.name);
-      if (matchedBoms.length > 0) {
-        matchedBoms.forEach(b => {
-          const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId) || String(m.name).trim() === String(b.materialId).trim());
-          const targetMatName = mat ? String(mat.name).trim() : (b.materialId || defaultMat);
-          if (!targetMatName) return;
-          let bQty = parseFloat(b.qty) || 0;
-          let bUnit = (b.unit || 'g').toLowerCase();
-          let kgPerPcs = (bUnit === 'kg') ? bQty : (bQty / 1000);
-          const totalReqKg = pcs * kgPerPcs * 1.1 + (res.prepMaterialKg || 0);
-          if (!materialMap[targetMatName]) materialMap[targetMatName] = { requiredKg: 0 };
-          materialMap[targetMatName].requiredKg += totalReqKg;
-        });
-      } else if (defaultMat) {
-        // 製品マスターからの所要量
-        let usageG = masterItem ? (masterItem.materialUsageG || masterItem.weight || 0) : 0;
-        if (usageG === 0 && masterItem && masterItem.rollWeight) {
-          usageG = (parseFloat(masterItem.rollWeight) || 0) * 1000;
-        }
-        const baseMatKg = (pcs * usageG * 1.1) / 1000;
-        const prepKg = res.prepMaterialKg || 0;
-        const totalReqKg = baseMatKg + prepKg;
-
-        if (!materialMap[defaultMat]) materialMap[defaultMat] = { requiredKg: 0 };
-        materialMap[defaultMat].requiredKg += totalReqKg;
-      }
-    });
-
-    const matKeys = Object.keys(materialMap).sort();
+    const matKeys = getAllMaterialNames().slice().sort();
 
     if (matKeys.length === 0) {
       tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8; padding:15px;">${tr("msg_no_materials_registered")}</td></tr>`;
@@ -11705,42 +11666,37 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
         materialStockData[matName] = { currentStockKg: 0, nextArrivalDate: '', nextArrivalKg: 0, leadTimeDays: 0, safetyStockKg: 0 };
       }
       const stockInfo = materialStockData[matName];
-      const reqKg = materialMap[matName].requiredKg;
-      
+      const actualUsedKg = actualUsageByMatName[matName] || 0;
+
       const currentStockKg = stockInfo.currentStockKg || 0;
       const nextArrivalKg = stockInfo.nextArrivalKg || 0;
       const leadTimeDays = stockInfo.leadTimeDays || 0;
       const safetyStockKg = stockInfo.safetyStockKg || 0;
-      const totalAvailableKg = currentStockKg + nextArrivalKg;
-      
-      const remainingKg = currentStockKg - reqKg;
 
       const t = translations[currentLang] || translations.ja;
       let statusHtml = '';
-      if (currentStockKg >= reqKg && remainingKg >= safetyStockKg) {
-        statusHtml = `<span style="color:#10b981; font-weight:bold;">${t.ms_status_safe || '✔ 在庫十分 (安全)'}</span>`;
-      } else if (currentStockKg >= reqKg) {
-        statusHtml = `<span style="color:#2563eb; font-weight:bold;">✔ 計画充当可 (安全在庫割れ)</span>`;
-      } else if (totalAvailableKg >= reqKg) {
-        statusHtml = `<span style="color:#d97706; font-weight:bold;">${t.ms_status_pending || '⚠️ 次回入荷で充当可'}</span>`;
+      if (currentStockKg >= safetyStockKg) {
+        statusHtml = `<span style="color:#10b981; font-weight:bold;">✔ 在庫十分 (安全在庫以上)</span>`;
+      } else if (currentStockKg >= 0) {
+        statusHtml = `<span style="color:#d97706; font-weight:bold;">⚠️ 安全在庫割れ</span>`;
       } else {
-        const shortKg = Math.abs(reqKg - totalAvailableKg).toFixed(1);
-        const msg = (t.ms_status_short || '❌ 材料不足 ({short} kg 不足)').replace('{short}', shortKg);
-        statusHtml = `<span style="color:#ef4444; font-weight:bold;">${msg}</span>`;
+        statusHtml = `<span style="color:#ef4444; font-weight:bold;">❌ 在庫マイナス</span>`;
       }
 
-      // 🧪 日割り時系列MRPによる枯渇予測日・発注推奨日・推奨発注量
-      const mrp = computeMaterialMRPTimeline(matName);
+      // 🧪 発注予測（③ 受注・発注残連動 発注提案と同じデータ＝生産計画ベース）
+      const sug = reorderMap[matName];
       let depletionHtml = `<span style="color:#94a3b8;">-</span>`;
-      let suggestDateHtml = `<span style="color:#94a3b8;">-</span>`;
+      let suggestDateHtml = `<span style="color:#10b981;">発注不要</span>`;
       let suggestQtyHtml = `<span style="color:#94a3b8;">-</span>`;
       let orderBtnHtml = '';
 
-      if (mrp.depletionDate) {
-        const isUrgentColor = mrp.isUrgent ? '#ef4444' : '#b45309';
-        depletionHtml = `<span style="font-weight:bold; color:${isUrgentColor};">${mrp.depletionDate}</span>`;
-        suggestDateHtml = `<span style="font-weight:bold; color:${isUrgentColor};">${mrp.suggestedOrderDate}</span>${mrp.isUrgent ? `<br><span style="color:#fff; background:#ef4444; font-size:0.65rem; padding:1px 5px; border-radius:3px;">${tr('lbl_material_urgent')}</span>` : ''}`;
-        suggestQtyHtml = `<span style="font-weight:bold; color:#7c3aed;">${mrp.suggestedQtyKg.toLocaleString()} kg</span>`;
+      if (sug && sug.needsOrder) {
+        const isUrgentColor = sug.isUrgent ? '#ef4444' : '#b45309';
+        depletionHtml = sug.earliestDueDate
+          ? `<span style="font-weight:bold; color:${isUrgentColor};">${sug.earliestDueDate}</span>`
+          : `<span style="color:#94a3b8;">-</span>`;
+        suggestDateHtml = `<span style="font-weight:bold; color:${isUrgentColor};">${sug.orderDeadline}</span>${sug.isUrgent ? `<br><span style="color:#fff; background:#ef4444; font-size:0.65rem; padding:1px 5px; border-radius:3px;">${tr('lbl_material_urgent')}</span>` : ''}`;
+        suggestQtyHtml = `<span style="font-weight:bold; color:#7c3aed;">${sug.suggestedQty.toLocaleString()} kg</span>`;
         orderBtnHtml = `<button type="button" title="${tr('btn_ms_one_click_order')}" onclick="oneClickOrderMaterial('${matName.replace(/'/g, "\\'")}')" style="background:#7c3aed; color:#fff; padding:5px 8px; font-size:0.72rem; width:auto; white-space:nowrap;">${tr('btn_ms_one_click_order')}</button>`;
       }
 
@@ -11761,9 +11717,9 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
           <input type="number" class="input-inline" style="width:90px; font-weight:bold;" value="${currentStockKg}" step="0.1" 
             onchange="updateMaterialStock('${matName}', 'currentStockKg', this.value)"> kg
         </td>
-        <td style="background:#fef3c7; font-weight:bold; color:#b45309;">${reqKg.toFixed(1)} kg</td>
-        <td style="background:#f0fdf4; font-weight:bold; color:${remainingKg >= 0 ? '#15803d' : '#ef4444'};">
-          ${remainingKg.toFixed(1)} kg
+        <td style="background:#fef3c7; font-weight:bold; color:#b45309;">${actualUsedKg.toFixed(1)} kg</td>
+        <td style="background:#f0fdf4; font-weight:bold; color:${(currentStockKg - safetyStockKg) >= 0 ? '#15803d' : '#ef4444'};">
+          ${(currentStockKg - safetyStockKg).toFixed(1)} kg
         </td>
         <td>
           <input type="date" class="input-inline" style="width:125px;" value="${stockInfo.nextArrivalDate || ''}" 
@@ -11825,32 +11781,36 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     scheduleMaterialSync();
   }
 
-  // 材料の発注提案（日割り時系列MRPによる枯渇予測日 - リードタイム = 発注推奨日）を全材料分算出する
+  // 材料の発注提案（生産計画＝未生産受注残 × BOM に基づく、③と同一ロジック）を全材料分算出する
   function computeMaterialOrderPlan(results) {
-    const plan = [];
-    getAllMaterialNames().forEach(matName => {
-      const mrp = computeMaterialMRPTimeline(matName);
-      if (mrp.depletionDate) plan.push(mrp);
-    });
+    const plan = computeReorderSuggestions().map(s => ({
+      matName: s.matName,
+      depletionDate: s.earliestDueDate || s.orderDeadline,
+      suggestedOrderDate: s.orderDeadline,
+      suggestedQtyKg: s.suggestedQty,
+      leadTimeDays: s.material.leadTime,
+      isUrgent: s.isUrgent
+    }));
     plan.sort((a, b) => a.suggestedOrderDate < b.suggestedOrderDate ? -1 : 1);
     return plan;
   }
 
   // 📦 ワンクリック発注処理: 該当材料の「次回入荷予定日」「次回入荷予定量」に発注推奨データを自動セットする
+  // （③ 受注・発注残連動 発注提案＝生産計画ベースの数値をそのまま使用）
   function oneClickOrderMaterial(matName) {
-    const mrp = computeMaterialMRPTimeline(matName);
-    if (!mrp.depletionDate) {
+    const sug = computeReorderSuggestionsMap()[matName];
+    if (!sug || !sug.needsOrder) {
       alert(tr('msg_ms_no_shortage', { name: matName }));
       return;
     }
-    if (!confirm(tr('confirm_ms_one_click_order', { name: matName, date: mrp.depletionDate, qty: mrp.suggestedQtyKg }))) return;
+    if (!confirm(tr('confirm_ms_one_click_order', { name: matName, date: sug.orderDeadline, qty: sug.suggestedQty }))) return;
 
     pushUndoState();
     if (!materialStockData[matName]) {
       materialStockData[matName] = { currentStockKg: 0, nextArrivalDate: '', nextArrivalKg: 0, leadTimeDays: 0, safetyStockKg: 0 };
     }
-    materialStockData[matName].nextArrivalDate = mrp.depletionDate;
-    materialStockData[matName].nextArrivalKg = mrp.suggestedQtyKg;
+    materialStockData[matName].nextArrivalDate = sug.earliestDueDate || sug.orderDeadline;
+    materialStockData[matName].nextArrivalKg = sug.suggestedQty;
 
     // 発注管理(purchaseOrders)にも自動で起票
     const mat = materialMasterV2.find(m => String(m.name).trim() === String(matName).trim());
@@ -11858,13 +11818,13 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       orderId: purchaseOrderSeq++,
       orderDate: formatDateLocal(new Date()),
       materialId: mat ? mat.id : matName,
-      orderQty: mrp.suggestedQtyKg,
+      orderQty: sug.suggestedQty,
       unit: mat ? mat.unit : 'kg',
       supplier: mat ? mat.supplier : '',
-      leadTime: mrp.leadTimeDays,
-      dueDate: mrp.depletionDate,
+      leadTime: mat ? mat.leadTime : 0,
+      dueDate: sug.orderDeadline,
       status: '発注済',
-      amount: (mat && mat.unitPrice ? mat.unitPrice * mrp.suggestedQtyKg : 0)
+      amount: (mat && mat.unitPrice ? mat.unitPrice * sug.suggestedQty : 0)
     };
     purchaseOrders.push(newPO);
 
@@ -11873,7 +11833,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     calculate();
     if (typeof renderMaterialOrderingTab === 'function') renderMaterialOrderingTab();
     scheduleMaterialSync();
-    alert(tr('msg_ms_order_applied', { name: matName, date: mrp.depletionDate, qty: mrp.suggestedQtyKg }));
+    alert(tr('msg_ms_order_applied', { name: matName, date: sug.orderDeadline, qty: sug.suggestedQty }));
     setTimeout(() => scrollToMaterialRow(matName), 100);
   }
 
@@ -13210,7 +13170,7 @@ function renderBomTable() {
 // ===== 発注提案（受注引当・未生産予約＋発注残ベースの有効在庫MRP判定ロジック） =====
 // 有効在庫 = 現在庫 + 発注残(入荷待ち) − 未生産受注による引当必要量
 // 有効在庫 < 安全在庫 の場合、不足分（安全在庫 − 有効在庫）を即座に発注提案
-function computeReorderSuggestions() {
+function computeReorderSuggestions(includeAll) {
   const todayStr = formatDateLocal(new Date());
 
   return materialMasterV2.map(m => {
@@ -13327,6 +13287,7 @@ function computeReorderSuggestions() {
 
     return {
       material: m,
+      matName: String(m.name).trim(),
       currentStock,
       pendingPoQty,
       reservedDemandQty,
@@ -13339,7 +13300,56 @@ function computeReorderSuggestions() {
       orderDeadline,
       isUrgent
     };
-  }).filter(r => r.needsOrder);
+  }).filter(r => includeAll || r.needsOrder);
+}
+
+// 🧪 材料名をキーにして即座に発注提案データを引けるようにするマップ
+// （① 材料一覧テーブルと ③ 発注提案テーブルの計算を完全に一致させるための連携用ヘルパー）
+function computeReorderSuggestionsMap() {
+  const map = {};
+  computeReorderSuggestions(true).forEach(r => { map[r.matName] = r; });
+  return map;
+}
+
+// 🧪 生産実績（dailyActuals）ベースで、材料ごとの累計消費量(kg)を算出する
+// ※ 今後の生産計画分は含めず、実際に生産した数量のみを対象とする
+function computeActualConsumedKgByMaterial() {
+  const usageByMatName = {};
+  if (!dailyActuals || typeof dailyActuals !== 'object') return usageByMatName;
+
+  Object.keys(dailyActuals).forEach(key => {
+    const actualQty = Number(dailyActuals[key]) || 0;
+    if (!actualQty) return;
+    const orderId = key.split('_')[0];
+    const order = Array.isArray(orders) ? orders.find(o => String(o.id) === String(orderId)) : null;
+    if (!order) return;
+    const productName = order.name;
+
+    const matchedBoms = (Array.isArray(bomList) ? bomList : []).filter(b => b.productName === productName);
+    if (matchedBoms.length > 0) {
+      matchedBoms.forEach(b => {
+        const mat = materialMasterV2.find(m => String(m.id) === String(b.materialId) || String(m.name).trim() === String(b.materialId).trim());
+        const matName = mat ? String(mat.name).trim() : String(b.materialId || '').trim();
+        if (!matName) return;
+        const bQty = parseFloat(b.qty) || 0;
+        const bUnit = (b.unit || 'g').toLowerCase();
+        const kgPerPcs = (bUnit === 'kg') ? bQty : (bQty / 1000);
+        usageByMatName[matName] = (usageByMatName[matName] || 0) + actualQty * kgPerPcs * 1.1;
+      });
+    } else {
+      const masterItem = Array.isArray(masterData) ? masterData.find(m => m.name === productName) : null;
+      const matName = (order.material || (masterItem ? (masterItem.material || (masterItem.materials && masterItem.materials[0])) : '') || '').trim();
+      if (!matName) return;
+      let usageG = masterItem ? (masterItem.materialUsageG || masterItem.weight || 0) : 0;
+      if (usageG === 0 && masterItem && masterItem.rollWeight) {
+        usageG = (parseFloat(masterItem.rollWeight) || 0) * 1000;
+      }
+      const kgPerPcs = (usageG * 1.1) / 1000;
+      usageByMatName[matName] = (usageByMatName[matName] || 0) + actualQty * kgPerPcs;
+    }
+  });
+
+  return usageByMatName;
 }
 
 function renderReorderSuggestions() {
