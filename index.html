@@ -139,6 +139,111 @@
       font-weight: normal;
     }
 
+    /* ⚙ ヘッダー「その他」折りたたみメニュー */
+    .header-more {
+      position: relative;
+    }
+    .header-more > summary {
+      list-style: none;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #475569;
+    }
+    .header-more > summary::-webkit-details-marker { display: none; }
+    .header-more > summary:hover { background: #e2e8f0; }
+    .header-more[open] > summary { background: #dbeafe; border-color: #93c5fd; }
+    .header-more-panel {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.15);
+      padding: 12px;
+      min-width: 260px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .header-more-panel .hm-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header-more-panel .hm-label { font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 4px; }
+
+    /* 🔔 アラート通知センター（5パネルを1つに集約） */
+    .notif-bell-wrap { position: relative; }
+    .notif-bell-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      font-size: 1.05rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notif-bell-btn:hover { background: #e2e8f0; }
+    .notif-bell-btn.has-alerts { background: #fef2f2; border-color: #fca5a5; }
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: bold;
+      border-radius: 8px;
+      padding: 1px 5px;
+      line-height: 1.3;
+      min-width: 15px;
+      text-align: center;
+    }
+    .notif-dropdown {
+      display: none;
+      position: absolute;
+      top: 42px;
+      right: 0;
+      width: min(480px, 90vw);
+      max-height: 70vh;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(15,23,42,0.2);
+      padding: 12px;
+      z-index: 500;
+    }
+    .notif-dropdown.open { display: block; }
+    .notif-dropdown .req-alert-panel,
+    .notif-dropdown .delay-alert-panel,
+    .notif-dropdown .overflow-alert-panel,
+    .notif-dropdown .uph-alert-panel {
+      margin-bottom: 10px;
+    }
+    .notif-dropdown .req-alert-panel:last-child,
+    .notif-dropdown .delay-alert-panel:last-child,
+    .notif-dropdown .overflow-alert-panel:last-child,
+    .notif-dropdown .uph-alert-panel:last-child {
+      margin-bottom: 0;
+    }
+    .notif-empty {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      padding: 20px 10px;
+    }
+
     .overflow-alert-panel {
       background-color: #fef2f2;
       border: 1px solid #ef4444;
@@ -725,85 +830,77 @@
 
     .tab-btn-group {
       display: flex;
-      gap: 5px;
+      gap: 2px;
       margin-bottom: 0;
       flex-wrap: wrap;
       align-items: flex-end;
-      border-bottom: 2.5px solid #cbd5e1;
+      border-bottom: 1.5px solid #e2e8f0;
       padding-bottom: 0;
     }
     .tab-btn {
-      background: #f1f5f9;
-      color: #475569;
-      padding: 7px 13px;
+      background: transparent;
+      color: #64748b;
+      padding: 6px 10px;
       border-radius: 6px 6px 0 0;
       width: auto;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border: 1px solid #cbd5e1;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid transparent;
       border-bottom: none;
       cursor: grab;
       position: relative;
-      transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+      transition: background 0.15s, color 0.15s;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       user-select: none;
-      margin-bottom: -2.5px;
+      margin-bottom: -1.5px;
     }
     .tab-btn:hover {
-      background: #e2e8f0;
+      background: #f1f5f9;
       color: #1e293b;
     }
     .tab-btn:active {
       cursor: grabbing;
     }
     .tab-drag-handle {
-      opacity: 0.35;
+      opacity: 0;
       font-size: 0.85rem;
       cursor: grab;
       margin-right: 2px;
     }
     .tab-btn:hover .tab-drag-handle {
-      opacity: 0.8;
+      opacity: 0.6;
     }
     
     /* 選択中のタブ（製造モード） */
     .tab-btn.active {
-      background: #1d4ed8 !important;
-      color: #ffffff !important;
-      border: 1px solid #1d4ed8 !important;
-      border-top: 3.5px solid #60a5fa !important;
-      border-bottom: none !important;
-      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
-      font-weight: bold;
+      background: transparent !important;
+      color: #1d4ed8 !important;
+      border: 1px solid transparent !important;
+      border-bottom: 2px solid #1d4ed8 !important;
+      font-weight: 600;
       z-index: 3;
-      transform: translateY(-3px);
     }
     .tab-btn.active .tab-drag-handle {
-      opacity: 0.9;
-      color: #bfdbfe;
+      opacity: 0.6;
     }
 
     /* 選択中のタブ（営業モード） */
     .tab-btn.sales-tab {
-      background: #f1f5f9;
-      color: #475569;
+      background: transparent;
+      color: #64748b;
     }
     .tab-btn.sales-tab.active {
-      background: #047857 !important;
-      color: #ffffff !important;
-      border: 1px solid #047857 !important;
-      border-top: 3.5px solid #34d399 !important;
-      border-bottom: none !important;
-      box-shadow: 0 4px 10px rgba(4, 120, 87, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
-      font-weight: bold;
+      background: transparent !important;
+      color: #047857 !important;
+      border: 1px solid transparent !important;
+      border-bottom: 2px solid #047857 !important;
+      font-weight: 600;
       z-index: 3;
-      transform: translateY(-3px);
     }
     .tab-btn.sales-tab.active .tab-drag-handle {
-      opacity: 0.9;
-      color: #a7f3d0;
+      opacity: 0.6;
     }
 
     /* タブドラッグ中のエフェクト */
@@ -1217,31 +1314,30 @@
 
   .dashboard-card {
     background: #ffffff;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 15px;
-    border: 2px solid #cbd5e1;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+    transition: border-color 0.2s ease;
   }
   .dashboard-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    border-color: #2563eb;
+    border-color: #94a3b8;
   }
 
   .dashboard-card.alert {
-    border-color: #ef4444;
+    border-color: #fca5a5;
     background: #fef2f2;
   }
   .dashboard-card.alert:hover {
-    box-shadow: 0 4px 16px rgba(239,68,68,0.15);
+    border-color: #ef4444;
   }
 
   .dashboard-card.warning {
-    border-color: #f59e0b;
+    border-color: #fde68a;
     background: #fffbeb;
   }
   .dashboard-card.warning:hover {
-    box-shadow: 0 4px 16px rgba(245,158,11,0.15);
+    border-color: #f59e0b;
   }
 
   .dashboard-card h3 {
@@ -1534,66 +1630,92 @@
   <h1 class="no-print">
     <span id="appMainTitle">DIP / Tube 生産計画・日割りカレンダー＆管理システム</span>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-      <!-- Language Selector -->
-      <div style="display:inline-flex; align-items:center; gap:4px; background:#ffffff; border:1.5px solid #2563eb; border-radius:16px; padding:2px 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <span style="font-size:0.8rem;">🌐</span>
-        <select class="lang-select-elem" onchange="setLanguage(this.value)" style="border:none; background:transparent; font-size:0.78rem; font-weight:bold; cursor:pointer; outline:none; padding:2px 0;">
-          <option value="ja">🇯🇵 日本語</option>
-          <option value="en">🇺🇸 English</option>
-          <option value="th">🇹🇭 ภาษาไทย</option>
-        </select>
-      </div>
 
       <div class="mode-switch-container">
         <button type="button" class="mode-btn active sales" id="btnModeSales" onclick="setAppMode('sales')">👔 営業モード</button>
         <button type="button" class="mode-btn mfg" id="btnModeMfg" onclick="setAppMode('mfg')">🔧 製造モード (管理者)</button>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span id="currentCategoryBadge" style="font-size:0.9rem; font-weight:bold; color:#2563eb;">🎈 DIP (ディップ成形) モード中</span>
-        <button id="btnEntranceElem" type="button" onclick="showEntranceScreen()" style="width:auto; padding:5px 12px; font-size:0.78rem; background:#475569; color:#fff; border-radius:16px; border:none; cursor:pointer;" title="DIPとTubeの切り替え選択画面（初期トップページ）に戻ります">🏠 DIP/Tube 切り替え (選択画面へ)</button>
-      </div>
-      <div class="mfg-only" style="display:none;">
-        <button id="btnUndoElem" type="button" onclick="undo()" style="width:auto; padding:4px 10px; font-size:0.75rem; background:#64748b; margin-right:6px;" title="直前の操作に戻します">↩ 戻す</button>
-      </div>
-      <div id="sharedDataSyncBar" style="display:flex; align-items:center; gap:6px; background:#eef2ff; border:1px solid #c7d2fe; border-radius:16px; padding:4px 10px; font-size:0.72rem; flex-wrap:wrap;">
-        <span id="headerDriveAuthStatus" data-i18n="drive_status_disconnected_short" style="color:#4338ca; font-weight:bold;">🔌 Drive未接続</span>
-        <button type="button" id="btnHeaderDriveConnect" data-i18n="btn_drive_login_short" onclick="connectGoogleDrive()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#4338ca;">🔑 ログイン</button>
-        <span id="systemSyncStatus" style="color:#64748b;"></span>
-        <button type="button" id="btnHeaderSetFolder" onclick="promptSetDefaultFolder()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#7c3aed;" title="共有Driveフォルダ（図面・共有データ保存先）のURLを設定します">⚙️ 共有フォルダ設定</button>
-        <button type="button" id="btnSystemSyncPull" onclick="pullSystemDataFromDrive(true)" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#0284c7; display:none;" title="Drive上の最新共有データを取得して画面に反映します">⬇ 最新を取得</button>
-        <button type="button" id="btnSystemSyncPush" onclick="pushSystemDataToDrive()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#0d9488; display:none;" title="現在のデータをすぐにDriveへ保存します">⬆ 今すぐ保存</button>
-        <label style="display:flex; align-items:center; gap:3px; color:#4338ca; cursor:pointer; margin:0;" title="オンにすると、データ変更時に自動でDrive上の共有ファイルへ保存されます">
-          <input type="checkbox" id="chkAutoSync" onchange="toggleAutoSystemSync(this.checked)" style="width:auto; margin:0;"><span data-i18n="lbl_auto_sync">自動同期</span>
-        </label>
-      </div>
+
+      <span id="currentCategoryBadge" style="font-size:0.85rem; font-weight:bold; color:#2563eb;">🎈 DIP モード中</span>
+
       <span class="save-indicator" id="saveMsg">✔ 自動保存済</span>
+
+      <!-- 🔔 アラート通知センター：出荷変更申請・納期遅延・材料発注・キャパ超過・生産数調整を1箇所に集約 -->
+      <div class="notif-bell-wrap no-print">
+        <button type="button" id="notifBellBtn" class="notif-bell-btn" onclick="toggleNotifCenter(event)" title="通知センター（アラート一覧）">
+          🔔<span id="notifBellBadge" class="notif-badge" style="display:none;">0</span>
+        </button>
+        <div id="notifDropdown" class="notif-dropdown">
+          <div id="requestAlertPanel" class="req-alert-panel no-print">
+            <h3 id="reqAlertTitleElem">🔔 営業からの出荷日変更申請（要・手動承認）</h3>
+            <div id="requestAlertList"></div>
+          </div>
+
+          <div id="delayAlertPanel" class="delay-alert-panel no-print">
+            <h3 id="delayAlertTitleElem" data-i18n="delay_alert_title">⚠️ 納期遅延アラート (Delivery Delay Alert)</h3>
+            <div id="delayAlertList"></div>
+          </div>
+
+          <div id="materialAlertPanel" class="delay-alert-panel no-print" style="border-color:#7c3aed; background-color:#f5f3ff; color:#5b21b6;">
+            <h3 id="materialAlertTitleElem" data-i18n="material_alert_title" style="margin:0 0 8px 0; font-size:0.95rem; display:flex; align-items:center; gap:8px;">🧪 材料 発注提案アラート (Material Order Suggestion)</h3>
+            <div id="materialAlertList"></div>
+          </div>
+
+          <div id="overflowAlertPanel" class="overflow-alert-panel no-print">
+            <h3 id="overflowAlertTitleElem">⚠️ 生産キャパシティ超過アラート（全対応設備満杯）</h3>
+            <ul id="overflowList" class="overflow-list"></ul>
+          </div>
+
+          <div id="uphAlertPanel" class="uph-alert-panel no-print">
+            <h3 id="uphAlertTitleElem">🔧 生産数調整中のシフト一覧（金型破損など不測の事態）</h3>
+            <ul id="uphAlertList" class="uph-alert-list"></ul>
+          </div>
+
+          <div id="notifEmptyMsg" class="notif-empty">現在、対応が必要なアラートはありません 👍</div>
+        </div>
+      </div>
+
+      <!-- ⚙ その他設定（言語・DIP/Tube切替・戻す・Drive同期）をまとめて格納 -->
+      <details class="header-more no-print" id="headerMoreMenu">
+        <summary title="その他の設定・切り替え">⚙</summary>
+        <div class="header-more-panel">
+          <div class="hm-label">🌐 言語 / Language</div>
+          <div class="hm-row">
+            <select class="lang-select-elem" onchange="setLanguage(this.value)" style="padding:4px 6px; font-size:0.8rem;">
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="th">🇹🇭 ภาษาไทย</option>
+            </select>
+          </div>
+
+          <div class="hm-label">部門切り替え</div>
+          <div class="hm-row">
+            <button id="btnEntranceElem" type="button" onclick="showEntranceScreen()" style="width:auto; padding:5px 12px; font-size:0.78rem; background:#475569; color:#fff; border-radius:8px; border:none; cursor:pointer;" title="DIPとTubeの切り替え選択画面（初期トップページ）に戻ります">🏠 DIP/Tube 切り替え</button>
+          </div>
+
+          <div class="mfg-only" style="display:none;">
+            <div class="hm-label">操作</div>
+            <div class="hm-row">
+              <button id="btnUndoElem" type="button" onclick="undo()" style="width:auto; padding:5px 12px; font-size:0.78rem; background:#64748b; border-radius:8px;" title="直前の操作に戻します">↩ 戻す</button>
+            </div>
+          </div>
+
+          <div class="hm-label">☁ Drive 共有データ同期</div>
+          <div id="sharedDataSyncBar" class="hm-row" style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:8px; padding:8px; font-size:0.72rem;">
+            <span id="headerDriveAuthStatus" data-i18n="drive_status_disconnected_short" style="color:#4338ca; font-weight:bold;">🔌 Drive未接続</span>
+            <button type="button" id="btnHeaderDriveConnect" data-i18n="btn_drive_login_short" onclick="connectGoogleDrive()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#4338ca;">🔑 ログイン</button>
+            <span id="systemSyncStatus" style="color:#64748b;"></span>
+            <button type="button" id="btnHeaderSetFolder" onclick="promptSetDefaultFolder()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#7c3aed;" title="共有Driveフォルダ（図面・共有データ保存先）のURLを設定します">⚙️ 共有フォルダ設定</button>
+            <button type="button" id="btnSystemSyncPull" onclick="pullSystemDataFromDrive(true)" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#0284c7; display:none;" title="Drive上の最新共有データを取得して画面に反映します">⬇ 最新を取得</button>
+            <button type="button" id="btnSystemSyncPush" onclick="pushSystemDataToDrive()" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#0d9488; display:none;" title="現在のデータをすぐにDriveへ保存します">⬆ 今すぐ保存</button>
+            <label style="display:flex; align-items:center; gap:3px; color:#4338ca; cursor:pointer; margin:0;" title="オンにすると、データ変更時に自動でDrive上の共有ファイルへ保存されます">
+              <input type="checkbox" id="chkAutoSync" onchange="toggleAutoSystemSync(this.checked)" style="width:auto; margin:0;"><span data-i18n="lbl_auto_sync">自動同期</span>
+            </label>
+          </div>
+        </div>
+      </details>
     </div>
   </h1>
-
-  <div id="requestAlertPanel" class="req-alert-panel no-print">
-    <h3 id="reqAlertTitleElem">🔔 営業からの出荷日変更申請（要・手動承認）</h3>
-    <div id="requestAlertList"></div>
-  </div>
-
-  <div id="delayAlertPanel" class="delay-alert-panel no-print">
-    <h3 id="delayAlertTitleElem" data-i18n="delay_alert_title">⚠️ 納期遅延アラート (Delivery Delay Alert)</h3>
-    <div id="delayAlertList"></div>
-  </div>
-
-  <div id="materialAlertPanel" class="delay-alert-panel no-print" style="border-color:#7c3aed; background-color:#f5f3ff; color:#5b21b6;">
-    <h3 id="materialAlertTitleElem" data-i18n="material_alert_title" style="margin:0 0 8px 0; font-size:0.95rem; display:flex; align-items:center; gap:8px;">🧪 材料 発注提案アラート (Material Order Suggestion)</h3>
-    <div id="materialAlertList"></div>
-  </div>
-
-  <div id="overflowAlertPanel" class="overflow-alert-panel no-print">
-    <h3 id="overflowAlertTitleElem">⚠️ 生産キャパシティ超過アラート（全対応設備満杯）</h3>
-    <ul id="overflowList" class="overflow-list"></ul>
-  </div>
-
-  <div id="uphAlertPanel" class="uph-alert-panel no-print">
-    <h3 id="uphAlertTitleElem">🔧 生産数調整中のシフト一覧（金型破損など不測の事態）</h3>
-    <ul id="uphAlertList" class="uph-alert-list"></ul>
-  </div>
 
   <!-- ===== STEP A: 本日のタスク帯（ダッシュボード表示時のみ表示） ===== -->
   <div class="today-tasks-banner active" id="todayTasksBannerWrap">
@@ -14030,11 +14152,71 @@ function renderMaterialOrderingTab() {
   }
 
   /**
+   * 🔔 通知センター（5種のアラートパネルを1つに集約）
+   * 既存の updateRequestAlertPanel / updateDelayAlertPanel / updateOverflowAlert / updateUphOverrideAlert 等は
+   * これまで通り各パネルの style.display を直接書き換えるだけでよく、変更不要。
+   * ここではその表示状態を監視してベルのバッジ数・空メッセージだけを更新する。
+   */
+  function toggleNotifCenter(evt) {
+    if (evt) evt.stopPropagation();
+    const dd = document.getElementById('notifDropdown');
+    if (dd) dd.classList.toggle('open');
+  }
+
+  function refreshNotifBell() {
+    const ids = ['requestAlertPanel', 'delayAlertPanel', 'materialAlertPanel', 'overflowAlertPanel', 'uphAlertPanel'];
+    let visibleCount = 0;
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.style.display !== 'none' && el.style.display !== '') visibleCount++;
+    });
+
+    const badge = document.getElementById('notifBellBadge');
+    const bellBtn = document.getElementById('notifBellBtn');
+    const emptyMsg = document.getElementById('notifEmptyMsg');
+
+    if (badge) {
+      if (visibleCount > 0) {
+        badge.style.display = '';
+        badge.textContent = visibleCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    if (bellBtn) bellBtn.classList.toggle('has-alerts', visibleCount > 0);
+    if (emptyMsg) emptyMsg.style.display = visibleCount > 0 ? 'none' : '';
+  }
+
+  function initNotifCenter() {
+    const ids = ['requestAlertPanel', 'delayAlertPanel', 'materialAlertPanel', 'overflowAlertPanel', 'uphAlertPanel'];
+    const observer = new MutationObserver(refreshNotifBell);
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+    });
+    refreshNotifBell();
+
+    // ドロップダウン／⚙メニューの外側クリックで閉じる
+    document.addEventListener('click', function(e) {
+      const dd = document.getElementById('notifDropdown');
+      const bellWrap = e.target.closest('.notif-bell-wrap');
+      if (dd && dd.classList.contains('open') && !bellWrap) {
+        dd.classList.remove('open');
+      }
+      const moreMenu = document.getElementById('headerMoreMenu');
+      if (moreMenu && moreMenu.open && !e.target.closest('.header-more')) {
+        moreMenu.open = false;
+      }
+    });
+  }
+
+  /**
    * ページロード時にダッシュボード初期化
    */
   document.addEventListener('DOMContentLoaded', function() {
     // 初期表示：ダッシュボード
     switchToTab('dashboard');
+    initNotifCenter();
 
     // 定期更新（30秒ごと）
     setInterval(() => {
