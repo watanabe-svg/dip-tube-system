@@ -924,6 +924,44 @@
       background-color: #ffffff;
     }
 
+    /* 📋 注文票：通常は文字だけを表示し、行をダブルクリックした時だけ編集用フォームを表示する */
+    #orderSheetTable tbody tr.draggable-row {
+      cursor: default;
+    }
+    #orderSheetTable tbody tr.draggable-row .cell-edit {
+      display: none;
+    }
+    #orderSheetTable tbody tr.draggable-row .cell-view {
+      display: inline-block;
+      padding: 3px 2px;
+      min-height: 20px;
+    }
+    #orderSheetTable tbody tr.draggable-row.row-editing {
+      background: #eff6ff;
+      outline: 2px solid #93c5fd;
+      outline-offset: -2px;
+    }
+    #orderSheetTable tbody tr.draggable-row.row-editing .cell-edit {
+      display: block;
+    }
+    #orderSheetTable tbody tr.draggable-row.row-editing .cell-view {
+      display: none;
+    }
+    #orderSheetTable tbody tr.draggable-row:not(.row-editing):hover {
+      background: #f8fafc;
+    }
+    #orderSheetTable tbody tr.draggable-row:not(.row-editing):hover .cell-view {
+      text-decoration: underline dotted #94a3b8;
+      text-underline-offset: 3px;
+      cursor: text;
+    }
+    .row-edit-hint {
+      font-size: 0.68rem;
+      color: #2563eb;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
@@ -1753,7 +1791,6 @@
       <button class="tab-btn mfg-only" id="tab_grouping" data-tab="grouping" draggable="true" onclick="switchView('grouping', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> 📊 顧客・材料別集計</button>
       <button class="tab-btn mfg-only" id="tab_product_stock" data-tab="product_stock" draggable="true" onclick="switchView('product_stock', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> 📦 完成品在庫管理</button>
       <button class="tab-btn mfg-only" id="tab_material_stock" data-tab="material_stock" draggable="true" onclick="switchView('material_stock', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> 🧪 材料管理（在庫・発注）</button>
-      <button class="tab-btn mfg-only" id="tab_changeover" data-tab="changeover" draggable="true" onclick="switchView('changeover', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> ⚙️ 段替えマスター設定</button>
       <button class="tab-btn mfg-only" id="tab_master" data-tab="master" draggable="true" onclick="switchView('master', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> ⚙️ 製品バックデータ (マスター)</button>
       <button class="tab-btn mfg-only" id="tab_summary" data-tab="summary" draggable="true" onclick="switchView('summary', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> 👥 キャパ・人工・稼働率管理</button>
       <button class="tab-btn mfg-only" id="tab_io" data-tab="io" draggable="true" onclick="switchView('io', event)" style="display:none;"><span class="tab-drag-handle" title="ドラッグして並び替え">⠿</span> ⚙️ 設定</button>
@@ -1770,35 +1807,35 @@
       <div class="dashboard-grid">
         <!-- 緊急アラート -->
         <div class="dashboard-card alert">
-          <h3>🚨 緊急アラート</h3>
+          <h3 data-i18n="dash_h_emergency">🚨 緊急アラート</h3>
           <ul class="alert-list" id="emergencyAlerts">
-            <li><strong>納期遅延の可能性</strong>ORD-001 (2日遅延予測)</li>
-            <li><strong>キャパシティ超過</strong>明日の負荷: 120%</li>
+            <li><strong data-i18n="dash_emergency_1_title">納期遅延の可能性</strong><span data-i18n="dash_emergency_1_body">ORD-001 (2日遅延予測)</span></li>
+            <li><strong data-i18n="dash_emergency_2_title">キャパシティ超過</strong><span data-i18n="dash_emergency_2_body">明日の負荷: 120%</span></li>
           </ul>
         </div>
 
         <!-- 確認待ち -->
         <div class="dashboard-card warning">
-          <h3>⏳ 確認待ち</h3>
+          <h3 data-i18n="dash_h_pending">⏳ 確認待ち</h3>
           <ul class="alert-list" id="pendingApprovals">
-            <li><strong>配方実績申請</strong>3件待機中</li>
-            <li><strong>生産計画確認</strong>2件確認待ち</li>
+            <li><strong data-i18n="dash_pending_1_title">配方実績申請</strong><span data-i18n="dash_pending_1_body">3件待機中</span></li>
+            <li><strong data-i18n="dash_pending_2_title">生産計画確認</strong><span data-i18n="dash_pending_2_body">2件確認待ち</span></li>
           </ul>
         </div>
 
         <!-- 本日の進捗 -->
         <div class="dashboard-card">
-          <h3>📊 本日の進捗</h3>
+          <h3 data-i18n="dash_h_today_progress">📊 本日の進捗</h3>
           <div class="dashboard-metric">
-            <span class="metric-label">計画タスク</span>
+            <span class="metric-label" data-i18n="dash_lbl_planned_task">計画タスク</span>
             <span class="metric-value" id="todayPlanned">0</span>
           </div>
           <div class="dashboard-metric">
-            <span class="metric-label">完了</span>
+            <span class="metric-label" data-i18n="dash_lbl_completed">完了</span>
             <span class="metric-value ok" id="todayCompleted">0</span>
           </div>
           <div class="kpi-box">
-            <div class="label">進捗率</div>
+            <div class="label" data-i18n="dash_lbl_progress_rate">進捗率</div>
             <div class="value" id="todayProgressRate">0%</div>
             <div class="dashboard-progress-bar">
               <div class="dashboard-progress-fill ok" id="todayProgressBar" style="width: 0%;">0%</div>
@@ -1808,17 +1845,17 @@
 
         <!-- 実績入力 -->
         <div class="dashboard-card">
-          <h3>📝 本日実績入力状況</h3>
+          <h3 data-i18n="dash_h_today_input">📝 本日実績入力状況</h3>
           <div class="dashboard-metric">
-            <span class="metric-label">入力済み</span>
+            <span class="metric-label" data-i18n="dash_lbl_input_complete">入力済み</span>
             <span class="metric-value ok" id="inputComplete">0 / 0</span>
           </div>
           <div class="dashboard-metric">
-            <span class="metric-label">未入力</span>
+            <span class="metric-label" data-i18n="dash_lbl_input_pending">未入力</span>
             <span class="metric-value warning" id="inputPending">0</span>
           </div>
           <button class="quick-action-btn primary" style="margin-top: 8px; width: 100%;"
-                  onclick="switchToTab('detail')">
+                  onclick="switchToTab('detail')" data-i18n="dash_btn_go_input">
             実績入力へ →
           </button>
         </div>
@@ -1828,21 +1865,21 @@
       <div class="dashboard-grid">
         <!-- 本日のタスク詳細 -->
         <div class="dashboard-card">
-          <h3>📋 本日のタスク詳細</h3>
+          <h3 data-i18n="dash_h_today_detail">📋 本日のタスク詳細</h3>
           <div id="todayTasksDetail" style="font-size: 0.8rem;">
-            <div class="task-chip">データ読み込み中...</div>
+            <div class="task-chip" data-i18n="dash_loading">データ読み込み中...</div>
           </div>
         </div>
 
         <!-- 明日の予定 -->
         <div class="dashboard-card">
-          <h3>📅 明日の予定</h3>
+          <h3 data-i18n="dash_h_tomorrow">📅 明日の予定</h3>
           <div id="tomorrowTasks" style="font-size: 0.8rem;">
-            <div class="task-chip">データ読み込み中...</div>
+            <div class="task-chip" data-i18n="dash_loading">データ読み込み中...</div>
           </div>
           <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
             <div class="dashboard-metric">
-              <span class="metric-label">予定負荷</span>
+              <span class="metric-label" data-i18n="dash_lbl_tomorrow_load">予定負荷</span>
               <span class="metric-value" id="tomorrowLoad">--</span>
             </div>
           </div>
@@ -1850,34 +1887,34 @@
 
         <!-- 設備状態 -->
         <div class="dashboard-card">
-          <h3>🔧 設備稼働状況</h3>
+          <h3 data-i18n="dash_h_equipment">🔧 設備稼働状況</h3>
           <div class="equipment-status">
             <div class="equipment-item running">
               <strong>D1</strong>
-              <span class="status-badge running">稼働中</span>
+              <span class="status-badge running" data-i18n="dash_status_running">稼働中</span>
             </div>
             <div class="equipment-item running">
               <strong>D2</strong>
-              <span class="status-badge running">稼働中</span>
+              <span class="status-badge running" data-i18n="dash_status_running">稼働中</span>
             </div>
             <div class="equipment-item planned">
               <strong>D3</strong>
-              <span class="status-badge planned">予定中</span>
+              <span class="status-badge planned" data-i18n="dash_status_planned">予定中</span>
             </div>
             <div class="equipment-item planned">
               <strong>D4</strong>
-              <span class="status-badge planned">予定中</span>
+              <span class="status-badge planned" data-i18n="dash_status_planned">予定中</span>
             </div>
           </div>
         </div>
 
         <!-- オペレータ配置 -->
         <div class="dashboard-card">
-          <h3>👥 本日のオペレータ配置</h3>
+          <h3 data-i18n="dash_h_operator">👥 本日のオペレータ配置</h3>
           <div id="operatorAllocation">
             <div class="dashboard-metric">
-              <span class="metric-label">配置予定</span>
-              <span class="metric-value ok">確認中</span>
+              <span class="metric-label" data-i18n="dash_lbl_operator_planned">配置予定</span>
+              <span class="metric-value ok" data-i18n="dash_status_checking">確認中</span>
             </div>
           </div>
         </div>
@@ -1885,18 +1922,18 @@
 
       <!-- クイックアクション -->
       <div class="card" style="background: #f0f9ff; border-top: 3px solid #2563eb;">
-        <h2>🚀 クイックアクション</h2>
+        <h2 data-i18n="dash_h_quick_actions">🚀 クイックアクション</h2>
         <div class="quick-actions">
-          <button class="quick-action-btn primary" onclick="switchToTab('detail')">
+          <button class="quick-action-btn primary" onclick="switchToTab('detail')" data-i18n="dash_qa_input">
             📊 実績入力
           </button>
-          <button class="quick-action-btn secondary" onclick="scrollToFormula()">
+          <button class="quick-action-btn secondary" onclick="scrollToFormula()" data-i18n="dash_qa_formula">
             ✅ 配方承認
           </button>
-          <button class="quick-action-btn success" onclick="switchToTab('detail')">
+          <button class="quick-action-btn success" onclick="switchToTab('detail')" data-i18n="dash_qa_plan">
             📋 生産計画確認
           </button>
-          <button class="quick-action-btn muted" onclick="switchToTab('dashboard')">
+          <button class="quick-action-btn muted" onclick="switchToTab('dashboard')" data-i18n="dash_qa_refresh">
             🔄 更新
           </button>
         </div>
@@ -2358,7 +2395,7 @@
           </div>
         </div>
         <p id="osDescElem" style="font-size:0.75rem; color:#64748b; margin-top:-5px;">
-          ※左端「☰」ドラッグで生産順序の変更が可能です。画面内で直接数量・設備・歩留・準備材料kg等を修正できます。図面ボタンから登録された図面・仕様書を参照できます。
+          ※左端「☰」ドラッグで生産順序の変更が可能です。<strong style="color:#2563eb;">行をダブルクリックすると、その行だけ編集フォームが開きます</strong>（もう一度ダブルクリックか他の行をクリックで閉じます）。図面ボタンから登録された図面・仕様書を参照できます。
         </p>
         <div style="overflow-x:auto; border: 1px solid var(--border-color);">
           <table class="data-table" id="orderSheetTable" style="min-width:1570px;">
@@ -2635,34 +2672,6 @@
         </div>
       </div>
 
-      <div id="viewChangeover" class="card mfg-only view-container" style="display:none;">
-        <h2 id="coTitleElem">⚙️ 段替え時間 ＆ 材料替え初期設定</h2>
-        <div style="background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #cbd5e1; max-width:600px;">
-          <h3 id="coSubTitle1" style="margin-top:0; font-size:0.9rem; color:#2563eb;">⏱️ 段替え時間設定</h3>
-          <div class="form-group">
-            <label id="lblCoDiffMat">📦 材料のみ違う場合 (材料変更):</label>
-            <input type="number" id="co_diffMaterial" value="40" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
-          </div>
-          <div class="form-group">
-            <label id="lblCoDiffModel">🔧 モデル名(金型)のみ違う場合 (金型変更):</label>
-            <input type="number" id="co_diffModel" value="15" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
-          </div>
-          <div class="form-group">
-            <label id="lblCoHeavy">⚡ 材料・金型の両方が違う場合 (両方変更):</label>
-            <input type="number" id="co_heavy" value="45" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
-          </div>
-
-          <hr style="border:none; border-top:1px solid #cbd5e1; margin:15px 0;">
-
-          <h3 id="coSubTitle2" style="margin-top:0; font-size:0.9rem; color:#d97706;">🧪 材料変更時の初期準備材料（デフォルト設定）</h3>
-          <div class="form-group">
-            <label id="lblCoPrepKg">材料替え発生時の初期準備・パージ使用量 (kg):</label>
-            <input type="number" id="co_prepMatKg" value="15" min="0" step="1" onchange="saveChangeoverMatrix()"> kg
-            <span id="coNoticeElem" style="font-size:0.7rem; color:#64748b;">※材料名が直前と変わる際に、この量が自動で材料必要量へ加算されます。</span>
-          </div>
-        </div>
-      </div>
-
       <div id="viewMaster" class="card mfg-only view-container" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <h2 id="mstTitleElem" style="margin:0; border:none; padding:0;">製品バックデータ一覧</h2>
@@ -2860,6 +2869,32 @@
 
       <div id="viewIO" class="card mfg-only view-container" style="display:none;">
         <h2 id="ioTitleElem">⚙️ 設定</h2>
+
+        <div id="viewChangeover" style="background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #cbd5e1; max-width:600px; margin-top:15px;">
+          <h3 id="coTitleElem" style="margin-top:0; font-size:0.95rem; color:#2563eb;">⚙️ 段替え時間 ＆ 材料替え初期設定</h3>
+          <h4 id="coSubTitle1" style="margin:10px 0 6px; font-size:0.85rem; color:#334155;">⏱️ 段替え時間設定</h4>
+          <div class="form-group">
+            <label id="lblCoDiffMat">📦 材料のみ違う場合 (材料変更):</label>
+            <input type="number" id="co_diffMaterial" value="40" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
+          </div>
+          <div class="form-group">
+            <label id="lblCoDiffModel">🔧 モデル名(金型)のみ違う場合 (金型変更):</label>
+            <input type="number" id="co_diffModel" value="15" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
+          </div>
+          <div class="form-group">
+            <label id="lblCoHeavy">⚡ 材料・金型の両方が違う場合 (両方変更):</label>
+            <input type="number" id="co_heavy" value="45" min="0" step="5" onchange="saveChangeoverMatrix()"> <span class="unit-min-label">分</span>
+          </div>
+
+          <hr style="border:none; border-top:1px solid #cbd5e1; margin:15px 0;">
+
+          <h4 id="coSubTitle2" style="margin:10px 0 6px; font-size:0.85rem; color:#b45309;">🧪 材料変更時の初期準備材料（デフォルト設定）</h4>
+          <div class="form-group">
+            <label id="lblCoPrepKg">材料替え発生時の初期準備・パージ使用量 (kg):</label>
+            <input type="number" id="co_prepMatKg" value="15" min="0" step="1" onchange="saveChangeoverMatrix()"> kg
+            <span id="coNoticeElem" style="font-size:0.7rem; color:#64748b;">※材料名が直前と変わる際に、この量が自動で材料必要量へ加算されます。</span>
+          </div>
+        </div>
 
         <div style="background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #cbd5e1; margin-top:15px;">
           <h3 id="ioDataMgmtTitle" style="margin-top:0; font-size:0.95rem; color:#2563eb;" data-i18n="h_data_mgmt">⚙️ データ管理・一括設定</h3>
@@ -4088,6 +4123,39 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       opt_unshipped: "未出荷 (一部出荷含む)",
       delay_alert_title: "⚠️ 納期遅延アラート",
       delay_alert_msg: "以下のオーダーは出荷予定日（納期）に間に合わない（遅延する）可能性があります:",
+      dash_h_emergency: "🚨 緊急アラート",
+      dash_emergency_1_title: "納期遅延の可能性",
+      dash_emergency_1_body: "ORD-001 (2日遅延予測)",
+      dash_emergency_2_title: "キャパシティ超過",
+      dash_emergency_2_body: "明日の負荷: 120%",
+      dash_h_pending: "⏳ 確認待ち",
+      dash_pending_1_title: "配方実績申請",
+      dash_pending_1_body: "3件待機中",
+      dash_pending_2_title: "生産計画確認",
+      dash_pending_2_body: "2件確認待ち",
+      dash_h_today_progress: "📊 本日の進捗",
+      dash_lbl_planned_task: "計画タスク",
+      dash_lbl_completed: "完了",
+      dash_lbl_progress_rate: "進捗率",
+      dash_h_today_input: "📝 本日実績入力状況",
+      dash_lbl_input_complete: "入力済み",
+      dash_lbl_input_pending: "未入力",
+      dash_btn_go_input: "実績入力へ →",
+      dash_h_today_detail: "📋 本日のタスク詳細",
+      dash_loading: "データ読み込み中...",
+      dash_h_tomorrow: "📅 明日の予定",
+      dash_lbl_tomorrow_load: "予定負荷",
+      dash_h_equipment: "🔧 設備稼働状況",
+      dash_status_running: "稼働中",
+      dash_status_planned: "予定中",
+      dash_h_operator: "👥 本日のオペレータ配置",
+      dash_lbl_operator_planned: "配置予定",
+      dash_status_checking: "確認中",
+      dash_h_quick_actions: "🚀 クイックアクション",
+      dash_qa_input: "📊 実績入力",
+      dash_qa_formula: "✅ 配方承認",
+      dash_qa_plan: "📋 生産計画確認",
+      dash_qa_refresh: "🔄 更新",
       dayNames: ['日', '月', '火', '水', '木', '金', '土']
     },
     en: {
@@ -4754,6 +4822,39 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       opt_unshipped: "Unshipped (Incl. Partial)",
       delay_alert_title: "⚠️ Delivery Delay Alert",
       delay_alert_msg: "The following orders may not meet their shipping deadlines (delayed):",
+      dash_h_emergency: "🚨 Urgent alerts",
+      dash_emergency_1_title: "Possible delivery delay",
+      dash_emergency_1_body: "ORD-001 (2-day delay forecast)",
+      dash_emergency_2_title: "Capacity exceeded",
+      dash_emergency_2_body: "Tomorrow's load: 120%",
+      dash_h_pending: "⏳ Pending review",
+      dash_pending_1_title: "Formula actuals request",
+      dash_pending_1_body: "3 waiting",
+      dash_pending_2_title: "Production plan review",
+      dash_pending_2_body: "2 pending",
+      dash_h_today_progress: "📊 Today's progress",
+      dash_lbl_planned_task: "Planned tasks",
+      dash_lbl_completed: "Completed",
+      dash_lbl_progress_rate: "Progress rate",
+      dash_h_today_input: "📝 Today's input status",
+      dash_lbl_input_complete: "Entered",
+      dash_lbl_input_pending: "Pending",
+      dash_btn_go_input: "Go to input →",
+      dash_h_today_detail: "📋 Today's task detail",
+      dash_loading: "Loading data...",
+      dash_h_tomorrow: "📅 Tomorrow's plan",
+      dash_lbl_tomorrow_load: "Planned load",
+      dash_h_equipment: "🔧 Equipment status",
+      dash_status_running: "Running",
+      dash_status_planned: "Planned",
+      dash_h_operator: "👥 Today's operator allocation",
+      dash_lbl_operator_planned: "Planned staffing",
+      dash_status_checking: "Checking",
+      dash_h_quick_actions: "🚀 Quick actions",
+      dash_qa_input: "📊 Enter actuals",
+      dash_qa_formula: "✅ Formula approval",
+      dash_qa_plan: "📋 Review production plan",
+      dash_qa_refresh: "🔄 Refresh",
       dayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     },
     th: {
@@ -5420,6 +5521,39 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       opt_unshipped: "ยังไม่ได้จัดส่ง (รวมจัดส่งบางส่วน)",
       delay_alert_title: "⚠️ แจ้งเตือนส่งมอบล่าช้า",
       delay_alert_msg: "ใบสั่งซื้อต่อไปนี้อาจจัดส่งไม่ทันกำหนดส่งมอบ (ล่าช้า):",
+      dash_h_emergency: "🚨 การแจ้งเตือนด่วน",
+      dash_emergency_1_title: "มีความเป็นไปได้ที่จะส่งมอบล่าช้า",
+      dash_emergency_1_body: "ORD-001 (คาดว่าล่าช้า 2 วัน)",
+      dash_emergency_2_title: "กำลังการผลิตเกิน",
+      dash_emergency_2_body: "ภาระงานวันพรุ่งนี้: 120%",
+      dash_h_pending: "⏳ รอการยืนยัน",
+      dash_pending_1_title: "คำขอผลการผลิตตามสูตร",
+      dash_pending_1_body: "รออยู่ 3 รายการ",
+      dash_pending_2_title: "ตรวจสอบแผนการผลิต",
+      dash_pending_2_body: "รอตรวจสอบ 2 รายการ",
+      dash_h_today_progress: "📊 ความคืบหน้าวันนี้",
+      dash_lbl_planned_task: "งานตามแผน",
+      dash_lbl_completed: "เสร็จสิ้น",
+      dash_lbl_progress_rate: "อัตราความคืบหน้า",
+      dash_h_today_input: "📝 สถานะการบันทึกผลงานวันนี้",
+      dash_lbl_input_complete: "บันทึกแล้ว",
+      dash_lbl_input_pending: "ยังไม่บันทึก",
+      dash_btn_go_input: "ไปที่หน้าบันทึกผลงาน →",
+      dash_h_today_detail: "📋 รายละเอียดงานวันนี้",
+      dash_loading: "กำลังโหลดข้อมูล...",
+      dash_h_tomorrow: "📅 แผนวันพรุ่งนี้",
+      dash_lbl_tomorrow_load: "ภาระงานตามแผน",
+      dash_h_equipment: "🔧 สถานะการทำงานของเครื่องจักร",
+      dash_status_running: "กำลังทำงาน",
+      dash_status_planned: "ตามแผน",
+      dash_h_operator: "👥 การจัดสรรพนักงานวันนี้",
+      dash_lbl_operator_planned: "แผนการจัดวาง",
+      dash_status_checking: "กำลังตรวจสอบ",
+      dash_h_quick_actions: "🚀 ทางลัด",
+      dash_qa_input: "📊 บันทึกผลงาน",
+      dash_qa_formula: "✅ อนุมัติสูตร",
+      dash_qa_plan: "📋 ตรวจสอบแผนการผลิต",
+      dash_qa_refresh: "🔄 รีเฟรช",
       dayNames: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.']
     }
   };
@@ -11213,10 +11347,12 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       });
 
       let colorOptionsHTML = '';
+      let colorLabel = '';
       allowedColors.forEach(cKey => {
         if (COLOR_MAP[cKey]) {
           const sel = ((res.color || 'transparent') === cKey) ? 'selected' : '';
           const cLabel = (COLOR_NAMES[currentLang] && COLOR_NAMES[currentLang][cKey]) || COLOR_MAP[cKey].label;
+          if (sel) colorLabel = cLabel;
           colorOptionsHTML += `<option value="${cKey}" ${sel}>${cLabel}</option>`;
         }
       });
@@ -11280,6 +11416,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       let prioColor = '#1e293b';
       if (res.isPriority === 1) prioColor = '#ef4444';
       if (res.isPriority === 2) prioColor = '#10b981';
+      const prioLabel = (res.isPriority === 1) ? t.prio_priority : (res.isPriority === 2) ? t.prio_stock : t.prio_normal;
 
       const hasDoc = (res.drawingFileName || res.specFileName) || (masterItem && ((masterItem.documents && masterItem.documents.length > 0) || masterItem.drawingFileName || masterItem.specFileName || masterItem.drawingImageData));
       const safeModelName = res.name.replace(/'/g, "\\'");
@@ -11306,23 +11443,36 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       const row = document.createElement('tr');
       row.className = 'draggable-row';
       row.dataset.index = i;
+      row.ondblclick = function(e) {
+        if (e.target.closest('button, a')) return;
+        toggleRowEditMode(row);
+      };
 
       row.innerHTML = `
         <td class="drag-handle" title="ドラッグして並び替え" style="width:20px; text-align:center;">☰</td>
         <td>${i + 1}</td>
         <td>
-          <select class="select-equip-inline" style="width:100%; font-weight:bold; color:${prioColor}; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'isPriority', this.value)">
-            <option value="0" ${res.isPriority === 0 ? 'selected' : ''}>${t.prio_normal}</option>
-            <option value="1" ${res.isPriority === 1 ? 'selected' : ''}>${t.prio_priority}</option>
-            <option value="2" ${res.isPriority === 2 ? 'selected' : ''}>${t.prio_stock}</option>
-          </select>
+          <span class="cell-view" style="font-weight:bold; color:${prioColor};">${prioLabel}</span>
+          <div class="cell-edit">
+            <select class="select-equip-inline" style="width:100%; font-weight:bold; color:${prioColor}; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'isPriority', this.value)">
+              <option value="0" ${res.isPriority === 0 ? 'selected' : ''}>${t.prio_normal}</option>
+              <option value="1" ${res.isPriority === 1 ? 'selected' : ''}>${t.prio_priority}</option>
+              <option value="2" ${res.isPriority === 2 ? 'selected' : ''}>${t.prio_stock}</option>
+            </select>
+          </div>
         </td>
         <td>
-          <select class="select-equip-inline" style="width:100%; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'color', this.value)">
-            ${colorOptionsHTML}
-          </select>
+          <span class="cell-view">${colorLabel}</span>
+          <div class="cell-edit">
+            <select class="select-equip-inline" style="width:100%; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'color', this.value)">
+              ${colorOptionsHTML}
+            </select>
+          </div>
         </td>
-        <td><input type="text" class="input-inline" style="width:100%; font-weight:bold; box-sizing:border-box;" value="${res.name || ''}" onchange="updateOrderField(${res.id}, 'name', this.value)"></td>
+        <td>
+          <span class="cell-view" style="font-weight:bold;">${res.name || ''}</span>
+          <div class="cell-edit"><input type="text" class="input-inline" style="width:100%; font-weight:bold; box-sizing:border-box;" value="${res.name || ''}" onchange="updateOrderField(${res.id}, 'name', this.value)"></div>
+        </td>
         <td style="text-align:center;">
           <div style="display:flex; gap:3px; justify-content:center;">
             ${docBtn}
@@ -11330,17 +11480,38 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
             ${checkBtnSheet}
           </div>
         </td>
-        <td>${customerHTML}</td>
-        <td>${materialHTML}</td>
         <td>
-          <select class="select-equip-inline" style="width:100%; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'targetEquip', this.value)">
-            ${equipOptionsHTML}
-          </select>
+          <span class="cell-view">${res.customer || '-'}</span>
+          <div class="cell-edit">${customerHTML}</div>
         </td>
-        <td><input type="number" class="input-inline" style="width:100%; box-sizing:border-box;" value="${res.orderQty || 0}" onchange="updateOrderField(${res.id}, 'orderQty', this.value)"></td>
-        <td><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#0284c7; background:#f0f9ff;" value="${res.stockQty || 0}" onchange="updateOrderField(${res.id}, 'stockQty', this.value)"></td>
-        <td><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#b45309; background:#fffbeb;" value="${res.prepMaterialKg || 0}" step="0.1" onchange="updateOrderField(${res.id}, 'prepMaterialKg', this.value)"></td>
-        <td><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#2563eb;" value="${res.yieldRate || 90}" min="1" max="100" onchange="updateOrderField(${res.id}, 'yieldRate', this.value)"></td>
+        <td>
+          <span class="cell-view">${res.material || '-'}</span>
+          <div class="cell-edit">${materialHTML}</div>
+        </td>
+        <td>
+          <span class="cell-view">${res.targetEquip || '-'}</span>
+          <div class="cell-edit">
+            <select class="select-equip-inline" style="width:100%; box-sizing:border-box;" onchange="updateOrderField(${res.id}, 'targetEquip', this.value)">
+              ${equipOptionsHTML}
+            </select>
+          </div>
+        </td>
+        <td>
+          <span class="cell-view">${(res.orderQty || 0).toLocaleString()}</span>
+          <div class="cell-edit"><input type="number" class="input-inline" style="width:100%; box-sizing:border-box;" value="${res.orderQty || 0}" onchange="updateOrderField(${res.id}, 'orderQty', this.value)"></div>
+        </td>
+        <td>
+          <span class="cell-view" style="font-weight:bold; color:#0284c7;">${(res.stockQty || 0).toLocaleString()}</span>
+          <div class="cell-edit"><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#0284c7; background:#f0f9ff;" value="${res.stockQty || 0}" onchange="updateOrderField(${res.id}, 'stockQty', this.value)"></div>
+        </td>
+        <td>
+          <span class="cell-view" style="font-weight:bold; color:#b45309;">${res.prepMaterialKg || 0}</span>
+          <div class="cell-edit"><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#b45309; background:#fffbeb;" value="${res.prepMaterialKg || 0}" step="0.1" onchange="updateOrderField(${res.id}, 'prepMaterialKg', this.value)"></div>
+        </td>
+        <td>
+          <span class="cell-view" style="font-weight:bold; color:#2563eb;">${res.yieldRate || 90}%</span>
+          <div class="cell-edit"><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#2563eb;" value="${res.yieldRate || 90}" min="1" max="100" onchange="updateOrderField(${res.id}, 'yieldRate', this.value)"></div>
+        </td>
         <td style="font-weight:bold; color:#1d4ed8;">${res.requiredProductionPcs.toLocaleString()} ${getUnitLabel()}</td>
         <td style="background:#f0f9ff; font-weight:bold;">${res.cumulativeActualQty.toLocaleString()} ${getUnitLabel()}
           <div style="margin-top:3px;">
@@ -11362,10 +11533,16 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
         </td>
         <td style="background:#f0f9ff;"><strong>${res.remainingPcsToProduce.toLocaleString()}</strong> ${getUnitLabel()}</td>
         <td><strong>${((res.totalMinutes || 0) / 60).toFixed(1)}</strong> h</td>
-        <td><input type="date" class="input-inline" style="width:100%; font-size:0.68rem; box-sizing:border-box;" value="${displayStartDate}" onchange="updateOrderField(${res.id}, 'startDateFixed', this.value)"></td>
+        <td>
+          <span class="cell-view">${displayStartDate || '-'}</span>
+          <div class="cell-edit"><input type="date" class="input-inline" style="width:100%; font-size:0.68rem; box-sizing:border-box;" value="${displayStartDate}" onchange="updateOrderField(${res.id}, 'startDateFixed', this.value)"></div>
+        </td>
         <td style="color:#64748b;">${res.lastCompletionDate || '-'}</td>
         <td style="background:#fefce8; font-weight:bold;">${res.readyToShipDate} (${res.postProcessLt || 0}${t.lt_days_suffix})</td>
-        <td><input type="date" class="input-inline" style="width:100%; font-size:0.68rem; box-sizing:border-box;" value="${displayDueDate}" onchange="updateOrderField(${res.id}, 'dueDate', this.value)"></td>
+        <td>
+          <span class="cell-view">${displayDueDate || '-'}</span>
+          <div class="cell-edit"><input type="date" class="input-inline" style="width:100%; font-size:0.68rem; box-sizing:border-box;" value="${displayDueDate}" onchange="updateOrderField(${res.id}, 'dueDate', this.value)"></div>
+        </td>
         <td class="${statusClass}">${statusText}</td>
         <td style="text-align:center;"><button class="btn-danger" onclick="removeOrder(${res.id})">${t.btn_delete}</button></td>
       `;
@@ -11373,6 +11550,18 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       addDragEvents(row);
       tbody.appendChild(row);
     });
+  }
+
+  /**
+   * 📋 注文票の行編集トグル：ダブルクリックした行だけ編集フォーム(cell-edit)を表示し、
+   * それ以外は文字表示(cell-view)のまま。もう一度ダブルクリック、または他の行を開くと閉じる。
+   */
+  function toggleRowEditMode(row) {
+    const tbody = row.parentElement;
+    if (!tbody) return;
+    const wasEditing = row.classList.contains('row-editing');
+    tbody.querySelectorAll('tr.row-editing').forEach(r => r.classList.remove('row-editing'));
+    if (!wasEditing) row.classList.add('row-editing');
   }
 
   function changeSalesMonth() {
@@ -12840,10 +13029,9 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       document.getElementById('viewGrouping').style.display = (view === 'grouping') ? 'block' : 'none';
       document.getElementById('viewProductStock').style.display = (view === 'product_stock') ? 'block' : 'none';
       document.getElementById('viewMaterialStock').style.display = (view === 'material_stock') ? 'block' : 'none';
-      document.getElementById('viewChangeover').style.display = (view === 'changeover') ? 'block' : 'none';
       document.getElementById('viewMaster').style.display = (view === 'master') ? 'block' : 'none';
       document.getElementById('viewSummary').style.display = (view === 'summary') ? 'block' : 'none';
-      document.getElementById('viewIO').style.display = (view === 'io') ? 'block' : 'none';
+      document.getElementById('viewIO').style.display = (view === 'io' || view === 'changeover') ? 'block' : 'none';
       if (document.getElementById('viewPostCalendar')) {
         document.getElementById('viewPostCalendar').style.display = (view === 'post_calendar' && currentCategory === 'dip') ? 'block' : 'none';
       }
@@ -14206,6 +14394,10 @@ function renderMaterialOrderingTab() {
       const moreMenu = document.getElementById('headerMoreMenu');
       if (moreMenu && moreMenu.open && !e.target.closest('.header-more')) {
         moreMenu.open = false;
+      }
+      const orderSheetTable = document.getElementById('orderSheetTable');
+      if (orderSheetTable && !e.target.closest('#orderSheetTable tbody tr.row-editing')) {
+        orderSheetTable.querySelectorAll('tbody tr.row-editing').forEach(r => r.classList.remove('row-editing'));
       }
     });
   }
