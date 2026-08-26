@@ -14257,7 +14257,7 @@ function renderMaterialOrderingTab() {
         customer: o.customer || '',
         material: o.material || '',
         color: o.color || 'transparent',
-        targetEquip: o.targetEquip || o.processType || getEquips()[0],
+        targetEquip: o.targetEquip || o.equipment || o.processType || getEquips()[0],
         isPriority: o.isPriority || 0,
         orderQty: o.orderQty || 1000,
         stockQty: o.stockQty || 0,
@@ -14342,7 +14342,11 @@ function renderMaterialOrderingTab() {
           // 応答が今のカテゴリと一致する場合のみ画面に反映する
           if (resData.status === 'success' && resData.data && currentCategory === savedCat) {
             if (resData.data.orders && resData.data.orders.length > 0) {
-              orders = resData.data.orders;
+              orders = resData.data.orders.map(o => ({
+                ...o,
+                material: o.material || '',
+                targetEquip: o.targetEquip || o.equipment || o.processType || getEquips()[0]
+              }));
             }
             if (resData.data.dailyActuals) {
               dailyActuals = resData.data.dailyActuals;
