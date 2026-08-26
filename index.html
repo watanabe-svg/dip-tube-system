@@ -955,6 +955,39 @@
       text-underline-offset: 3px;
       cursor: text;
     }
+    .btn-metrics-icon {
+      width: auto;
+      padding: 4px 6px;
+      font-size: 0.95rem;
+      line-height: 1;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0;
+    }
+    .btn-metrics-icon:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+    #metricsModal .metrics-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    #metricsModal .metrics-label {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    #metricsModal .metrics-value {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #1e293b;
+    }
     .row-edit-hint {
       font-size: 0.68rem;
       color: #2563eb;
@@ -1993,17 +2026,17 @@
 
         <!-- 🔔 営業から来た未入力オーダー依頼ゾーン -->
         <div style="background:#eff6ff; border:2px solid #60a5fa; border-radius:8px; padding:14px 16px; margin:12px 0 18px 0;">
-          <h3 style="margin:0 0 8px 0; font-size:0.9rem; color:#1e3a8a; display:flex; align-items:center; gap:6px;">🔔 営業から来た新規オーダー依頼（未製造入力）</h3>
+          <h3 style="margin:0 0 8px 0; font-size:0.9rem; color:#1e3a8a; display:flex; align-items:center; gap:6px;" data-i18n="h_pending_sales_orders">🔔 営業から来た新規オーダー依頼（未製造入力）</h3>
           <div style="overflow-x:auto; border: 1px solid #bfdbfe; border-radius:6px;">
             <table class="data-table" id="pendingSalesOrderTable">
               <thead>
                 <tr>
-                  <th style="width:90px;">依頼日</th>
-                  <th style="width:150px;">モデル名</th>
-                  <th style="width:120px;">顧客</th>
-                  <th style="width:80px;">数量</th>
-                  <th style="width:90px;">希望納期</th>
-                  <th style="width:130px;">操作</th>
+                  <th style="width:90px;" data-i18n="th_req_date">依頼日</th>
+                  <th style="width:150px;" data-i18n="th_model">モデル名</th>
+                  <th style="width:120px;" data-i18n="th_customer">顧客</th>
+                  <th style="width:80px;" data-i18n="th_order_qty">数量</th>
+                  <th style="width:90px;" data-i18n="th_req_due_date">希望納期</th>
+                  <th style="width:130px;" data-i18n="th_action">操作</th>
                 </tr>
               </thead>
               <tbody id="pendingSalesOrderTableBody"></tbody>
@@ -2274,47 +2307,61 @@
 
         <!-- 📝 営業からの新規オーダー依頼フォーム -->
         <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:8px; padding:14px 16px; margin-bottom:16px;">
-          <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:#92400e; display:flex; align-items:center; gap:6px;">📝 新規オーダー依頼（製造側へ送信）</h3>
-          <p style="font-size:0.72rem; color:#a16207; margin:0 0 10px 0;">数量・納期などの概要を送信すると、製造側に通知が届き、詳細設定（設備・生産速度など）を製造側が入力して正式登録します。</p>
+          <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:#92400e; display:flex; align-items:center; gap:6px;" data-i18n="h_soreq_form_title">📝 新規オーダー依頼（製造側へ送信）</h3>
+          <p style="font-size:0.72rem; color:#a16207; margin:0 0 10px 0;" data-i18n="desc_soreq_form">数量・納期などの概要を送信すると、製造側に通知が届き、詳細設定（設備・生産速度など）を製造側が入力して正式登録します。</p>
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <label style="font-size:0.72rem; color:#78350f;">モデル名</label>
-              <input type="text" id="soReqModelName" list="masterDatalist" placeholder="モデル名" style="width:160px; padding:6px;">
+              <label style="font-size:0.72rem; color:#78350f;" data-i18n="lbl_soreq_model">モデル名</label>
+              <input type="text" id="soReqModelName" list="masterDatalist" placeholder="モデル名" data-i18n-placeholder="lbl_soreq_model" style="width:160px; padding:6px;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <label style="font-size:0.72rem; color:#78350f;">顧客名</label>
-              <input type="text" id="soReqCustomer" placeholder="顧客名" style="width:140px; padding:6px;">
+              <label style="font-size:0.72rem; color:#78350f;" data-i18n="th_customer">顧客名</label>
+              <input type="text" id="soReqCustomer" placeholder="顧客名" data-i18n-placeholder="th_customer" style="width:140px; padding:6px;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <label style="font-size:0.72rem; color:#78350f;">数量 (pcs)</label>
-              <input type="number" id="soReqQty" min="1" placeholder="例: 1000" style="width:100px; padding:6px;">
+              <label style="font-size:0.72rem; color:#78350f;" data-i18n="lbl_soreq_qty">数量 (pcs)</label>
+              <input type="number" id="soReqQty" min="1" placeholder="例: 1000" data-i18n-placeholder="ph_soreq_qty" style="width:100px; padding:6px;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <label style="font-size:0.72rem; color:#78350f;">希望納期</label>
+              <label style="font-size:0.72rem; color:#78350f;" data-i18n="th_req_due_date">希望納期</label>
               <input type="date" id="soReqDueDate" style="width:150px; padding:6px;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:160px;">
-              <label style="font-size:0.72rem; color:#78350f;">備考 (任意)</label>
-              <input type="text" id="soReqNote" placeholder="特記事項など" style="width:100%; padding:6px; box-sizing:border-box;">
+              <label style="font-size:0.72rem; color:#78350f;" data-i18n="lbl_soreq_note">備考 (任意)</label>
+              <input type="text" id="soReqNote" placeholder="特記事項など" data-i18n-placeholder="ph_soreq_note" style="width:100%; padding:6px; box-sizing:border-box;">
             </div>
-            <button type="button" onclick="submitSalesOrderRequest()" style="width:auto; padding:8px 16px; margin:0; background:#f59e0b; font-weight:bold;">📨 製造へ送信</button>
+            <button type="button" onclick="submitSalesOrderRequest()" style="width:auto; padding:8px 16px; margin:0; background:#f59e0b; font-weight:bold;" data-i18n="btn_soreq_submit">📨 製造へ送信</button>
           </div>
         </div>
 
         <div style="margin-bottom:16px;">
-          <h3 style="margin:0 0 6px 0; font-size:0.85rem; color:#475569;">📨 送信済み依頼一覧</h3>
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+            <h3 style="margin:0; font-size:0.85rem; color:#475569;" data-i18n="h_soreq_sent_list">📨 送信済み依頼一覧</h3>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:0.75rem; color:#475569;">
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer; margin:0;">
+                <input type="checkbox" id="soReqShowProcessed" style="width:auto; margin:0;" onchange="toggleSoReqProcessedFilter()">
+                <span data-i18n="lbl_soreq_show_processed">✅ 登録済みも表示</span>
+              </label>
+              <div id="soReqProcessedDateRange" style="display:none; align-items:center; gap:6px;">
+                <span data-i18n="lbl_soreq_period">期間:</span>
+                <input type="date" id="soReqFilterFrom" style="width:auto; padding:3px 6px; font-size:0.75rem;" onchange="renderSalesOrderRequestTable()">
+                <span>〜</span>
+                <input type="date" id="soReqFilterTo" style="width:auto; padding:3px 6px; font-size:0.75rem;" onchange="renderSalesOrderRequestTable()">
+              </div>
+            </div>
+          </div>
           <div style="overflow-x:auto; border: 1px solid var(--border-color);">
             <table class="data-table" id="salesOrderRequestTable">
               <thead>
                 <tr>
-                  <th style="width:30px;">No.</th>
-                  <th style="width:90px;">送信日</th>
-                  <th style="width:130px;">モデル名</th>
-                  <th style="width:100px;">顧客</th>
-                  <th style="width:70px;">数量</th>
-                  <th style="width:90px;">希望納期</th>
-                  <th style="width:120px;">ステータス</th>
-                  <th style="width:50px;">取消</th>
+                  <th style="width:30px;" data-i18n="th_no">No.</th>
+                  <th style="width:90px;" data-i18n="th_soreq_sent_date">送信日</th>
+                  <th style="width:130px;" data-i18n="th_model">モデル名</th>
+                  <th style="width:100px;" data-i18n="th_customer">顧客</th>
+                  <th style="width:70px;" data-i18n="th_order_qty">数量</th>
+                  <th style="width:90px;" data-i18n="th_req_due_date">希望納期</th>
+                  <th style="width:120px;" data-i18n="th_status">ステータス</th>
+                  <th style="width:50px;" data-i18n="th_soreq_cancel">取消</th>
                 </tr>
               </thead>
               <tbody id="salesOrderRequestTableBody"></tbody>
@@ -2398,7 +2445,7 @@
           ※左端「☰」ドラッグで生産順序の変更が可能です。<strong style="color:#2563eb;">行をダブルクリックすると、その行だけ編集フォームが開きます</strong>（もう一度ダブルクリックか他の行をクリックで閉じます）。図面ボタンから登録された図面・仕様書を参照できます。
         </p>
         <div style="overflow-x:auto; border: 1px solid var(--border-color);">
-          <table class="data-table" id="orderSheetTable" style="min-width:1570px;">
+          <table class="data-table" id="orderSheetTable" style="min-width:1370px;">
             <thead>
               <tr>
                 <th style="width:20px;"></th>
@@ -2414,10 +2461,7 @@
                 <th style="width:70px; background:#e0f2fe;">在庫引当</th>
                 <th style="width:70px; background:#fffbeb;" title="材料替え発生時の初期準備材料(kg)">準備材料kg</th>
                 <th style="width:50px;">歩留%</th>
-                <th style="width:75px;">必要生産</th>
-                <th style="width:70px; background:#e0f2fe;">累計実績</th>
-                <th style="width:70px; background:#e0f2fe;">残り必要数</th>
-                <th style="width:55px;">所要時間</th>
+                <th style="width:36px;" title="必要生産・累計実績・残り必要数・所要時間">📊</th>
                 <th style="width:75px;">投入可能日</th>
                 <th style="width:75px;">完了予定</th>
                 <th style="width:80px; background:#fef3c7;">出荷可能日(+LT)</th>
@@ -3604,12 +3648,44 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_actual_tot: "累計実績",
       th_remaining: "残り必要数",
       th_est_hours: "所要時間",
+      th_metrics_col: "📊",
+      title_metrics_modal: "📊 生産数値詳細",
       th_start_date: "投入可能日",
       th_completion_date: "完了予定",
       th_ready_ship_date: "出荷可能日(+LT)",
       th_due_date: "出荷日 (納期)",
       th_status: "納期判定",
       th_action: "操作",
+      h_pending_sales_orders: "🔔 営業から来た新規オーダー依頼（未製造入力）",
+      th_req_date: "依頼日",
+      th_req_due_date: "希望納期",
+      h_soreq_form_title: "📝 新規オーダー依頼（製造側へ送信）",
+      desc_soreq_form: "数量・納期などの概要を送信すると、製造側に通知が届き、詳細設定（設備・生産速度など）を製造側が入力して正式登録します。",
+      lbl_soreq_model: "モデル名",
+      lbl_soreq_qty: "数量 (pcs)",
+      ph_soreq_qty: "例: 1000",
+      lbl_soreq_note: "備考 (任意)",
+      ph_soreq_note: "特記事項など",
+      btn_soreq_submit: "📨 製造へ送信",
+      h_soreq_sent_list: "📨 送信済み依頼一覧",
+      lbl_soreq_show_processed: "✅ 登録済みも表示",
+      lbl_soreq_period: "期間:",
+      th_soreq_sent_date: "送信日",
+      th_soreq_cancel: "取消",
+      msg_soreq_none_yet: "依頼はまだありません",
+      msg_soreq_no_match: "条件に一致する依頼はありません",
+      status_soreq_pending: "🕒 製造未対応",
+      status_soreq_taken: "✍️ 製造対応中",
+      status_soreq_processed: "✅ 登録済み",
+      msg_pending_soreq_none: "現在、営業からの未処理依頼はありません",
+      btn_soreq_take: "📝 取り込んで入力",
+      btn_soreq_retake: "↩ 再度入力へ",
+      alert_soreq_new_arrived: "🔔 営業から新規オーダー依頼が {count}件 届いています。\n「➕ オーダー新規登録」タブでご確認ください。",
+      alert_soreq_taken_into_form: "「{name}」の依頼内容をフォームに反映しました。残りの詳細項目（設備・生産速度など）を入力して「計画にオーダーを追加登録」を押してください。",
+      alert_soreq_need_model: "モデル名を入力してください。",
+      alert_soreq_need_qty: "数量を正しく入力してください。",
+      alert_soreq_sent: "「{name}」の新規オーダー依頼を製造側へ送信しました。",
+      confirm_soreq_cancel: "この依頼（{name} / {qty} {unit}）を取り消しますか？",
 
       prio_normal: "通常",
       prio_priority: "🔥 割込",
@@ -4302,12 +4378,44 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_actual_tot: "Actual Total",
       th_remaining: "Remaining",
       th_est_hours: "Est. Hours",
+      th_metrics_col: "📊",
+      title_metrics_modal: "📊 Production Metrics",
       th_start_date: "Earliest Date",
       th_completion_date: "Est. Finish",
       th_ready_ship_date: "Ready Date(+LT)",
       th_due_date: "Due Date",
       th_status: "Status",
       th_action: "Action",
+      h_pending_sales_orders: "🔔 New Order Requests from Sales (Not Yet Registered)",
+      th_req_date: "Request Date",
+      th_req_due_date: "Requested Due Date",
+      h_soreq_form_title: "📝 New Order Request (Send to Manufacturing)",
+      desc_soreq_form: "Submit a summary (quantity, due date, etc.) to notify manufacturing, who will enter the detailed settings (equipment, production speed, etc.) and formally register the order.",
+      lbl_soreq_model: "Model Name",
+      lbl_soreq_qty: "Qty (pcs)",
+      ph_soreq_qty: "e.g. 1000",
+      lbl_soreq_note: "Notes (optional)",
+      ph_soreq_note: "Special notes",
+      btn_soreq_submit: "📨 Send to Manufacturing",
+      h_soreq_sent_list: "📨 Sent Requests List",
+      lbl_soreq_show_processed: "✅ Show Registered Too",
+      lbl_soreq_period: "Period:",
+      th_soreq_sent_date: "Sent Date",
+      th_soreq_cancel: "Cancel",
+      msg_soreq_none_yet: "No requests yet",
+      msg_soreq_no_match: "No requests match the selected period",
+      status_soreq_pending: "🕒 Not Yet Handled",
+      status_soreq_taken: "✍️ In Progress",
+      status_soreq_processed: "✅ Registered",
+      msg_pending_soreq_none: "There are currently no pending requests from Sales",
+      btn_soreq_take: "📝 Load into Form",
+      btn_soreq_retake: "↩ Re-edit",
+      alert_soreq_new_arrived: "🔔 {count} new order request(s) have arrived from Sales.\nPlease check the \"➕ New Order Entry\" tab.",
+      alert_soreq_taken_into_form: "The request for \"{name}\" has been loaded into the form. Please fill in the remaining details (equipment, production speed, etc.) and click \"Add Order to Plan\".",
+      alert_soreq_need_model: "Please enter a model name.",
+      alert_soreq_need_qty: "Please enter a valid quantity.",
+      alert_soreq_sent: "The new order request for \"{name}\" has been sent to Manufacturing.",
+      confirm_soreq_cancel: "Cancel this request ({name} / {qty} {unit})?",
 
       prio_normal: "Normal",
       prio_priority: "🔥 Urgent",
@@ -5001,12 +5109,44 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       th_actual_tot: "ผลผลิตสะสม",
       th_remaining: "จำนวนที่เหลือ",
       th_est_hours: "เวลาที่ใช้",
+      th_metrics_col: "📊",
+      title_metrics_modal: "📊 รายละเอียดตัวเลขการผลิต",
       th_start_date: "วันเริ่มผลิตได้",
       th_completion_date: "คาดว่าเสร็จ",
       th_ready_ship_date: "วันพร้อมส่ง(+LT)",
       th_due_date: "กำหนดส่งมอบ",
       th_status: "สถานะ",
       th_action: "จัดการ",
+      h_pending_sales_orders: "🔔 คำขอสั่งซื้อใหม่จากฝ่ายขาย (ยังไม่ลงทะเบียนผลิต)",
+      th_req_date: "วันที่ขอ",
+      th_req_due_date: "กำหนดส่งที่ต้องการ",
+      h_soreq_form_title: "📝 คำขอสั่งซื้อใหม่ (ส่งให้ฝ่ายผลิต)",
+      desc_soreq_form: "ส่งข้อมูลสรุป (จำนวน, กำหนดส่ง ฯลฯ) เพื่อแจ้งฝ่ายผลิต จากนั้นฝ่ายผลิตจะกรอกรายละเอียด (เครื่องจักร, ความเร็วผลิต ฯลฯ) และลงทะเบียนอย่างเป็นทางการ",
+      lbl_soreq_model: "ชื่อรุ่น",
+      lbl_soreq_qty: "จำนวน (ชิ้น)",
+      ph_soreq_qty: "เช่น 1000",
+      lbl_soreq_note: "หมายเหตุ (ถ้ามี)",
+      ph_soreq_note: "ข้อสังเกตพิเศษ",
+      btn_soreq_submit: "📨 ส่งให้ฝ่ายผลิต",
+      h_soreq_sent_list: "📨 รายการคำขอที่ส่งแล้ว",
+      lbl_soreq_show_processed: "✅ แสดงที่ลงทะเบียนแล้วด้วย",
+      lbl_soreq_period: "ช่วงเวลา:",
+      th_soreq_sent_date: "วันที่ส่ง",
+      th_soreq_cancel: "ยกเลิก",
+      msg_soreq_none_yet: "ยังไม่มีคำขอ",
+      msg_soreq_no_match: "ไม่มีคำขอที่ตรงกับเงื่อนไข",
+      status_soreq_pending: "🕒 ฝ่ายผลิตยังไม่ดำเนินการ",
+      status_soreq_taken: "✍️ ฝ่ายผลิตกำลังดำเนินการ",
+      status_soreq_processed: "✅ ลงทะเบียนแล้ว",
+      msg_pending_soreq_none: "ขณะนี้ไม่มีคำขอที่ยังไม่ดำเนินการจากฝ่ายขาย",
+      btn_soreq_take: "📝 นำเข้าและกรอกข้อมูล",
+      btn_soreq_retake: "↩ กรอกข้อมูลอีกครั้ง",
+      alert_soreq_new_arrived: "🔔 มีคำขอสั่งซื้อใหม่จากฝ่ายขาย {count} รายการ\nกรุณาตรวจสอบที่แท็บ「➕ เพิ่มรายการสั่งซื้อใหม่」",
+      alert_soreq_taken_into_form: "นำข้อมูลคำขอของ「{name}」เข้าฟอร์มแล้ว กรุณากรอกรายละเอียดที่เหลือ (เครื่องจักร, ความเร็วผลิต ฯลฯ) แล้วกดปุ่ม「เพิ่มออเดอร์เข้าแผนการผลิต」",
+      alert_soreq_need_model: "กรุณากรอกชื่อรุ่น",
+      alert_soreq_need_qty: "กรุณากรอกจำนวนให้ถูกต้อง",
+      alert_soreq_sent: "ส่งคำขอสั่งซื้อใหม่ของ「{name}」ให้ฝ่ายผลิตแล้ว",
+      confirm_soreq_cancel: "ต้องการยกเลิกคำขอนี้ ({name} / {qty} {unit}) หรือไม่?",
 
       prio_normal: "ปกติ",
       prio_priority: "🔥 ด่วนพิเศษ",
@@ -5579,10 +5719,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
         <th style="width:50px; background:#e0f2fe;">${t.th_stock_alloc}</th>
         <th style="width:55px; background:#fffbeb;">${t.th_prep_mat}</th>
         <th style="width:40px;">${t.th_yield}</th>
-        <th style="width:75px;">${t.th_net_req}</th>
-        <th style="width:70px; background:#e0f2fe;">${t.th_actual_tot}</th>
-        <th style="width:70px; background:#e0f2fe;">${t.th_remaining}</th>
-        <th style="width:55px;">${t.th_est_hours}</th>
+        <th style="width:36px;" title="${t.th_net_req} / ${t.th_actual_tot} / ${t.th_remaining} / ${t.th_est_hours}">${t.th_metrics_col}</th>
         <th style="width:75px;">${t.th_start_date}</th>
         <th style="width:75px;">${t.th_completion_date}</th>
         <th style="width:80px; background:#fef3c7;">${t.th_ready_ship_date}</th>
@@ -9842,8 +9979,8 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     const dueDate = normalizeDateStr(document.getElementById('soReqDueDate').value);
     const note = document.getElementById('soReqNote').value.trim();
 
-    if (!modelName) return alert('モデル名を入力してください。');
-    if (qty <= 0) return alert('数量を正しく入力してください。');
+    if (!modelName) return alert(tr('alert_soreq_need_model'));
+    if (qty <= 0) return alert(tr('alert_soreq_need_qty'));
 
     salesOrderRequests.push({
       id: Date.now() + Math.random(),
@@ -9865,27 +10002,51 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
 
     saveData();
     renderSalesOrderRequestTable();
-    alert(`「${modelName}」の新規オーダー依頼を製造側へ送信しました。`);
+    alert(tr('alert_soreq_sent', { name: modelName }));
   }
 
   function removeSalesOrderRequest(id) {
     const rec = salesOrderRequests.find(r => r.id === id);
     if (!rec) return;
-    if (!confirm(`この依頼（${rec.modelName} / ${rec.qty.toLocaleString()} ${getUnitLabel()}）を取り消しますか？`)) return;
+    if (!confirm(tr('confirm_soreq_cancel', { name: rec.modelName, qty: rec.qty.toLocaleString(), unit: getUnitLabel() }))) return;
     salesOrderRequests = salesOrderRequests.filter(r => r.id !== id);
     saveData();
+    renderSalesOrderRequestTable();
+  }
+
+  function toggleSoReqProcessedFilter() {
+    const show = document.getElementById('soReqShowProcessed').checked;
+    const rangeEl = document.getElementById('soReqProcessedDateRange');
+    if (rangeEl) rangeEl.style.display = show ? 'flex' : 'none';
     renderSalesOrderRequestTable();
   }
 
   function renderSalesOrderRequestTable() {
     const tbody = document.getElementById('salesOrderRequestTableBody');
     if (!tbody) return;
-    if (!salesOrderRequests || salesOrderRequests.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:12px;">依頼はまだありません</td></tr>`;
+
+    const showProcessedEl = document.getElementById('soReqShowProcessed');
+    const showProcessed = showProcessedEl ? showProcessedEl.checked : false;
+    const fromVal = document.getElementById('soReqFilterFrom') ? document.getElementById('soReqFilterFrom').value : '';
+    const toVal = document.getElementById('soReqFilterTo') ? document.getElementById('soReqFilterTo').value : '';
+
+    let visible = (salesOrderRequests || []).filter(r => {
+      if (r.status !== 'processed') return true; // pending/takenは常に表示
+      if (!showProcessed) return false; // 登録済みはトグルON時のみ
+      // 期間フィルタ（登録済みのみ対象。送信日=requestedAtのYYYY-MM-DD部分で比較）
+      const reqDate = (r.requestedAt || '').slice(0, 10);
+      if (fromVal && reqDate < fromVal) return false;
+      if (toVal && reqDate > toVal) return false;
+      return true;
+    });
+
+    if (visible.length === 0) {
+      const emptyMsg = (salesOrderRequests || []).length === 0 ? tr('msg_soreq_none_yet') : tr('msg_soreq_no_match');
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:12px;">${emptyMsg}</td></tr>`;
       return;
     }
-    const sorted = [...salesOrderRequests].sort((a, b) => (b.requestedAt || '').localeCompare(a.requestedAt || '') || b.id - a.id);
-    const statusLabel = { pending: '🕒 製造未対応', taken: '✍️ 製造対応中', processed: '✅ 登録済み' };
+    const sorted = [...visible].sort((a, b) => (b.requestedAt || '').localeCompare(a.requestedAt || '') || b.id - a.id);
+    const statusLabel = { pending: tr('status_soreq_pending'), taken: tr('status_soreq_taken'), processed: tr('status_soreq_processed') };
     const statusColor = { pending: '#d97706', taken: '#2563eb', processed: '#16a34a' };
 
     tbody.innerHTML = sorted.map((r, i) => `
@@ -9923,7 +10084,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       }
     }
     if (currentAppMode === 'mfg' && pending.length > 0 && pending.length !== lastAlertedPendingSoCount) {
-      alert(`🔔 営業から新規オーダー依頼が ${pending.length}件 届いています。\n「➕ オーダー新規登録」タブでご確認ください。`);
+      alert(tr('alert_soreq_new_arrived', { count: pending.length }));
       lastAlertedPendingSoCount = pending.length;
     } else if (pending.length === 0) {
       lastAlertedPendingSoCount = 0;
@@ -9936,7 +10097,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     if (!tbody) return;
     const pending = (salesOrderRequests || []).filter(r => r.status === 'pending' || r.status === 'taken');
     if (pending.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">現在、営業からの未処理依頼はありません</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">${tr('msg_pending_soreq_none')}</td></tr>`;
       return;
     }
     const sorted = [...pending].sort((a, b) => (a.requestedAt || '').localeCompare(b.requestedAt || ''));
@@ -9949,7 +10110,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
         <td style="text-align:center;">${r.dueDate || '-'}</td>
         <td style="text-align:center;">
           <button type="button" onclick="takeSalesOrderRequest(${r.id})" style="width:auto; padding:3px 10px; font-size:0.72rem; background:${r.status === 'taken' ? '#94a3b8' : '#0d9488'};">
-            ${r.status === 'taken' ? '↩ 再度入力へ' : '📝 取り込んで入力'}
+            ${r.status === 'taken' ? tr('btn_soreq_retake') : tr('btn_soreq_take')}
           </button>
         </td>
       </tr>`).join('');
@@ -9976,7 +10137,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     checkSalesOrderRequestAlert();
 
     document.getElementById('viewNewOrder').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    alert(`「${req.modelName}」の依頼内容をフォームに反映しました。残りの詳細項目（設備・生産速度など）を入力して「計画にオーダーを追加登録」を押してください。`);
+    alert(tr('alert_soreq_taken_into_form', { name: req.modelName }));
   }
 
   // ==================== 🚚 出荷実績管理 ====================
@@ -11512,27 +11673,7 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
           <span class="cell-view" style="font-weight:bold; color:#2563eb;">${res.yieldRate || 90}%</span>
           <div class="cell-edit"><input type="number" class="input-inline" style="width:100%; box-sizing:border-box; font-weight:bold; color:#2563eb;" value="${res.yieldRate || 90}" min="1" max="100" onchange="updateOrderField(${res.id}, 'yieldRate', this.value)"></div>
         </td>
-        <td style="font-weight:bold; color:#1d4ed8;">${res.requiredProductionPcs.toLocaleString()} ${getUnitLabel()}</td>
-        <td style="background:#f0f9ff; font-weight:bold;">${res.cumulativeActualQty.toLocaleString()} ${getUnitLabel()}
-          <div style="margin-top:3px;">
-            ${(() => {
-              const p = Math.min(100, Math.round(((res.cumulativeActualQty + res.stockQty) / (res.orderQty || 1)) * 100));
-              const hasCut = order.hasCut;
-              let dipBg = p > 0 ? '#2563eb' : '#cbd5e1';
-              let cutBg = p >= 30 ? '#d97706' : '#cbd5e1';
-              let inspBg = p >= 70 ? '#0284c7' : '#cbd5e1';
-              let shipBg = p >= 100 ? '#10b981' : '#cbd5e1';
-              return `<div style="display:inline-flex; gap:2px; font-size:0.58rem; color:#fff; font-weight:bold;">
-                <span style="background:${dipBg}; padding:1px 3px; border-radius:2px;" title="DIPPING">DIP</span>
-                <span style="background:${hasCut ? cutBg : '#94a3b8'}; padding:1px 3px; border-radius:2px;" title="CUT">${hasCut ? 'CUT' : t.no_cut}</span>
-                <span style="background:${inspBg}; padding:1px 3px; border-radius:2px;" title="Inspection">${t.inspect_label}</span>
-                <span style="background:${shipBg}; padding:1px 3px; border-radius:2px;" title="Shipping">${t.ship_label}</span>
-              </div>`;
-            })()}
-          </div>
-        </td>
-        <td style="background:#f0f9ff;"><strong>${res.remainingPcsToProduce.toLocaleString()}</strong> ${getUnitLabel()}</td>
-        <td><strong>${((res.totalMinutes || 0) / 60).toFixed(1)}</strong> h</td>
+        <td style="text-align:center;"><button type="button" class="btn-metrics-icon" onclick="event.stopPropagation(); openMetricsPanel(${res.id});" title="必要生産・累計実績・残り必要数・所要時間を表示">📊</button></td>
         <td>
           <span class="cell-view">${displayStartDate || '-'}</span>
           <div class="cell-edit"><input type="date" class="input-inline" style="width:100%; font-size:0.68rem; box-sizing:border-box;" value="${displayStartDate}" onchange="updateOrderField(${res.id}, 'startDateFixed', this.value)"></div>
@@ -11550,6 +11691,52 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
       addDragEvents(row);
       tbody.appendChild(row);
     });
+  }
+
+  /**
+   * 📊 注文票の「必要生産・累計実績・残り必要数・所要時間」を常時表示せず、
+   * 行右端のアイコンをクリックした時だけ数値パネル(モーダル)で表示する。
+   */
+  function openMetricsPanel(orderId) {
+    const res = (latestComputedResults || []).find(r => r.id === orderId);
+    if (!res) return;
+    const order = orders.find(o => o.id === orderId);
+    const t = translations[currentLang] || translations.ja;
+
+    document.getElementById('metricsModalTitle').textContent = `${t.th_metrics_col} ${t.title_metrics_modal}`;
+    document.getElementById('metricsModalSubtitle').textContent = `${res.name || ''}${res.customer ? ' / ' + res.customer : ''}`;
+
+    document.getElementById('metricsLabelNetReq').textContent = t.th_net_req;
+    document.getElementById('metricsValNetReq').textContent = `${(res.requiredProductionPcs || 0).toLocaleString()} ${getUnitLabel()}`;
+
+    document.getElementById('metricsLabelActualTot').textContent = t.th_actual_tot;
+    document.getElementById('metricsValActualTot').textContent = `${(res.cumulativeActualQty || 0).toLocaleString()} ${getUnitLabel()}`;
+
+    document.getElementById('metricsLabelRemaining').textContent = t.th_remaining;
+    document.getElementById('metricsValRemaining').textContent = `${(res.remainingPcsToProduce || 0).toLocaleString()} ${getUnitLabel()}`;
+
+    document.getElementById('metricsLabelHours').textContent = t.th_est_hours;
+    document.getElementById('metricsValHours').textContent = `${((res.totalMinutes || 0) / 60).toFixed(1)} h`;
+
+    const badgeContainer = document.getElementById('metricsProgressBadges');
+    const p = Math.min(100, Math.round(((res.cumulativeActualQty + res.stockQty) / (res.orderQty || 1)) * 100));
+    const hasCut = order ? order.hasCut : false;
+    let dipBg = p > 0 ? '#2563eb' : '#cbd5e1';
+    let cutBg = p >= 30 ? '#d97706' : '#cbd5e1';
+    let inspBg = p >= 70 ? '#0284c7' : '#cbd5e1';
+    let shipBg = p >= 100 ? '#10b981' : '#cbd5e1';
+    badgeContainer.innerHTML = `<div style="display:flex; gap:4px; font-size:0.68rem; color:#fff; font-weight:bold;">
+      <span style="background:${dipBg}; padding:3px 6px; border-radius:3px; flex:1; text-align:center;" title="DIPPING">DIP</span>
+      <span style="background:${hasCut ? cutBg : '#94a3b8'}; padding:3px 6px; border-radius:3px; flex:1; text-align:center;" title="CUT">${hasCut ? 'CUT' : t.no_cut}</span>
+      <span style="background:${inspBg}; padding:3px 6px; border-radius:3px; flex:1; text-align:center;" title="Inspection">${t.inspect_label}</span>
+      <span style="background:${shipBg}; padding:3px 6px; border-radius:3px; flex:1; text-align:center;" title="Shipping">${t.ship_label}</span>
+    </div>`;
+
+    document.getElementById('metricsModal').style.display = 'flex';
+  }
+
+  function closeMetricsPanel() {
+    document.getElementById('metricsModal').style.display = 'none';
   }
 
   /**
@@ -14549,6 +14736,37 @@ function renderMaterialOrderingTab() {
     <div style="display:flex; justify-content:flex-end; gap:10px;">
       <button type="button" onclick="closeProdCheckModal()" class="btn-secondary" style="margin:0; width:100px;" data-i18n="btn_cancel">キャンセル</button>
       <button type="button" onclick="saveProdCheckFromModal()" style="background:#10b981; width:auto; padding:8px 18px; font-weight:bold;" data-i18n="btn_pcm_save">💾 Check工程データを保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="metricsModal" class="modal-overlay" style="display:none; z-index:10006;" onclick="if(event.target===this) closeMetricsPanel();">
+  <div class="modal-content" style="max-width:420px; width:92%; padding:20px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2563eb; padding-bottom:8px; margin-bottom:14px;">
+      <h3 id="metricsModalTitle" style="margin:0; font-size:1.05rem; color:#1e40af;">📊 生産数値詳細</h3>
+      <button type="button" onclick="closeMetricsPanel()" class="btn-secondary" style="margin:0; width:auto; padding:3px 10px;">✕ 閉じる</button>
+    </div>
+    <div style="font-size:0.8rem; color:#64748b; margin-bottom:12px;" id="metricsModalSubtitle"></div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div class="metrics-row">
+        <span class="metrics-label" id="metricsLabelNetReq">必要生産</span>
+        <span class="metrics-value" style="color:#1d4ed8;" id="metricsValNetReq">-</span>
+      </div>
+      <div class="metrics-row">
+        <span class="metrics-label" id="metricsLabelActualTot">累計実績</span>
+        <span class="metrics-value" style="color:#2563eb;" id="metricsValActualTot">-</span>
+      </div>
+      <div class="metrics-row" style="flex-direction:column; align-items:stretch; gap:6px;">
+        <div id="metricsProgressBadges"></div>
+      </div>
+      <div class="metrics-row">
+        <span class="metrics-label" id="metricsLabelRemaining">残り必要数</span>
+        <span class="metrics-value" style="color:#1e293b;" id="metricsValRemaining">-</span>
+      </div>
+      <div class="metrics-row">
+        <span class="metrics-label" id="metricsLabelHours">所要時間</span>
+        <span class="metrics-value" style="color:#1e293b;" id="metricsValHours">-</span>
+      </div>
     </div>
   </div>
 </div>
