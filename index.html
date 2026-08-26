@@ -12237,20 +12237,11 @@ const BACKYARD_GAS_URL = "https://script.google.com/macros/s/AKfycbzURJKfoPGXDzF
     table.innerHTML = theadHTML + tbodyHTML;
   }
 
-  function updateMaterialStock(matName, field, value) {
-    if (!materialStockData[matName]) {
-      materialStockData[matName] = { currentStockKg: 0, nextArrivalDate: '', nextArrivalKg: 0, leadTimeDays: 0, safetyStockKg: 0 };
-    }
-    pushUndoState();
-    if (field === 'nextArrivalDate') {
-      materialStockData[matName][field] = normalizeDateStr(value);
-    } else {
-      materialStockData[matName][field] = Math.max(0, parseFloat(value) || 0);
-    }
-    saveData();
-    saveSharedMaterialData();
-    renderMaterialStockTable();
-  }
+  // 🐛 修正: 同名の updateMaterialStock がここに重複定義されており、JSの仕様上こちらが
+  // 後勝ちで有効になっていた。この版は materialMasterV2 側を更新せずに再描画していたため、
+  // 再描画時の syncMaterialStockDataFromMasterV2() で入力直後に古い値（0）へ巻き戻る
+  // 不具合の原因になっていた。正しい実装は上の（11747行目付近の）定義に一本化し、
+  // ここは削除する。
 
   function renderGroupingTable() {
     const tbody = document.querySelector('#groupingTable tbody');
